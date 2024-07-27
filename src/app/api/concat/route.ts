@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sunoApi } from "@/lib/SunoApi";
-import { corsHeaders } from "@/lib/utils";
+import { corsHeaders } from "@/lib/http/corsHeaders";
+import sunoApiFactory from "@/lib/services/sunoApiFactory";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +8,7 @@ export async function POST(req: NextRequest) {
   if (req.method === 'POST') {
     try {
       const body = await req.json();
+      const sunoApi = await sunoApiFactory.create();
       const { clip_id } = body;
       if (!clip_id) {
         return new NextResponse(JSON.stringify({ error: 'Clip id is required' }), {
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
           }
         });
       }
-      const audioInfo = await (await sunoApi).concatenate(clip_id);
+      const audioInfo = await sunoApi.concatenate(clip_id);
       return new NextResponse(JSON.stringify(audioInfo), {
         status: 200,
         headers: {

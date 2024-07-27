@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
-import { DEFAULT_MODEL, sunoApi } from "@/lib/SunoApi";
-import { corsHeaders } from "@/lib/utils";
+import { corsHeaders } from "@/lib/http/corsHeaders";
+import sunoApiFactory from "@/lib/services/sunoApiFactory";
+import { DEFAULT_MODEL } from "@/lib/SunoApi";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,7 @@ export async function POST(req: NextRequest) {
     try {
       const body = await req.json();
       const { audio_id, prompt, continue_at, tags, title, model } = body;
+      const sunoApi = await sunoApiFactory.create();
 
       if (!audio_id) {
         return new NextResponse(JSON.stringify({ error: 'Audio ID is required' }), {
@@ -20,8 +22,14 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      const audioInfo = await (await sunoApi)
-        .extendAudio(audio_id, prompt, continue_at, tags, title, model || DEFAULT_MODEL);
+      const audioInfo = await sunoApi.extendAudio(
+        audio_id,
+        prompt,
+        continue_at,
+        tags,
+        title,
+        model || DEFAULT_MODEL
+      );
 
       return new NextResponse(JSON.stringify(audioInfo), {
         status: 200,
@@ -59,7 +67,6 @@ export async function POST(req: NextRequest) {
     });
   }
 }
-
 
 export async function OPTIONS(request: Request) {
   return new Response(null, {

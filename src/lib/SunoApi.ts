@@ -3,31 +3,13 @@ import UserAgent from 'user-agents';
 import pino from 'pino';
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar } from "tough-cookie";
-import { sleep } from "@/lib/utils";
+import { sleep } from "@/lib/http/utils";
+import AudioInfo from './models/AudioInfo';
 
 const logger = pino();
 export const DEFAULT_MODEL = "chirp-v3-5";
 
-
-export interface AudioInfo {
-  id: string; // Unique identifier for the audio
-  title?: string; // Title of the audio
-  image_url?: string; // URL of the image associated with the audio
-  lyric?: string; // Lyrics of the audio
-  audio_url?: string; // URL of the audio file
-  video_url?: string; // URL of the video associated with the audio
-  created_at: string; // Date and time when the audio was created
-  model_name: string; // Name of the model used for audio generation
-  gpt_description_prompt?: string; // Prompt for GPT description
-  prompt?: string; // Prompt for audio generation
-  status: string; // Status
-  type?: string;
-  tags?: string; // Genre of music.
-  duration?: string; // Duration of the audio
-  error_message?: string; // Error message if any
-}
-
-class SunoApi {
+export default class SunoApi {
   private static BASE_URL: string = 'https://studio-api.suno.ai';
   private static CLERK_BASE_URL: string = 'https://clerk.suno.com';
 
@@ -394,14 +376,3 @@ class SunoApi {
     };
   }
 }
-
-const newSunoApi = async (cookie: string) => {
-  const sunoApi = new SunoApi(cookie);
-  return await sunoApi.init();
-}
-
-if (!process.env.SUNO_COOKIE) {
-  console.log("Environment does not contain SUNO_COOKIE.", process.env)
-}
-
-export const sunoApi = newSunoApi(process.env.SUNO_COOKIE || '');

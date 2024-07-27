@@ -1,48 +1,18 @@
-import { NextResponse, NextRequest } from "next/server";
-import { sunoApi } from "@/lib/SunoApi";
-import { corsHeaders } from "@/lib/utils";
+import { options, get, MusicApiRequest } from "@/lib/http/requests";
+import { errorResponse, okResponse } from "@/lib/http/responses";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
-  if (req.method === 'GET') {
-    try {
+export const GET = get(async (req: MusicApiRequest) => {
+  try {      
+    const limit = await req.sunoApi.get_credits();
 
-      const limit = await (await sunoApi).get_credits();
+    return okResponse(limit);
+  } catch (error) {
+    console.error('Error fetching limit:', error);
 
-
-      return new NextResponse(JSON.stringify(limit), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching limit:', error);
-
-      return new NextResponse(JSON.stringify({ error: 'Internal server error. ' + error }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
-    }
-  } else {
-    return new NextResponse('Method Not Allowed', {
-      headers: {
-        Allow: 'GET',
-        ...corsHeaders
-      },
-      status: 405
-    });
+    return errorResponse({ error: 'Internal server error. ' + error }, 500);
   }
-}
+});
 
-export async function OPTIONS(request: Request) {
-  return new Response(null, {
-    status: 200,
-    headers: corsHeaders
-  });
-}
+export { options as OPTIONS };

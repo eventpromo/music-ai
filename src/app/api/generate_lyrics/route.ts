@@ -1,16 +1,17 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sunoApi } from "@/lib/SunoApi";
-import { corsHeaders } from "@/lib/utils";
+import { corsHeaders } from "@/lib/http/corsHeaders";
+import sunoApiFactory from "@/lib/services/sunoApiFactory";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   if (req.method === 'POST') {
     try {
+
       const body = await req.json();
       const { prompt } = body;
-
-      const lyrics = await (await sunoApi).generateLyrics(prompt);
+      const sunoApi = await sunoApiFactory.create();
+      const lyrics = await sunoApi.generateLyrics(prompt);
 
       return new NextResponse(JSON.stringify(lyrics), {
         status: 200,

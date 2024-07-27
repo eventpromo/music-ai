@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
-import { DEFAULT_MODEL, sunoApi } from "@/lib/SunoApi";
-import { corsHeaders } from "@/lib/utils";
+import { corsHeaders } from "@/lib/http/corsHeaders";
+import { DEFAULT_MODEL } from "@/lib/SunoApi";
+import sunoApiFactory from "@/lib/services/sunoApiFactory";
 
 export const maxDuration = 60; // allow longer timeout for wait_audio == true
 export const dynamic = "force-dynamic";
@@ -10,7 +11,8 @@ export async function POST(req: NextRequest) {
     try {
       const body = await req.json();
       const { prompt, tags, title, make_instrumental, model, wait_audio } = body;
-      const audioInfo = await (await sunoApi).custom_generate(
+      const sunoApi = await sunoApiFactory.create();
+      const audioInfo = await (sunoApi).custom_generate(
         prompt, tags, title,
         Boolean(make_instrumental),
         model || DEFAULT_MODEL,

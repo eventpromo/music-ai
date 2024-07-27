@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { sunoApi } from "@/lib/SunoApi";
-import { corsHeaders } from "@/lib/utils";
+import { corsHeaders } from "@/lib/http/corsHeaders";
+import sunoApiFactory from "@/lib/services/sunoApiFactory";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
   if (req.method === 'GET') {
     try {
       const url = new URL(req.url);
+      const sunoApi = await sunoApiFactory.create();
       const clipId = url.searchParams.get('id');
       if (clipId == null) {
         return new NextResponse(JSON.stringify({ error: 'Missing parameter id' }), {
