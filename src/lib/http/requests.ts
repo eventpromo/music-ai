@@ -1,22 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
-import SunoApi from "@/lib/SunoApi";
-import SunoApiFactory from "../services/SunoApiFactory";
 import { corsHeaders } from "./corsHeaders";
 
-type RequestHandler = (req: MusicApiRequest) => NextResponse | Promise<NextResponse>;
+type RequestHandler = (req: NextRequest) => NextResponse | Promise<NextResponse>;
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS';
-
-export interface MusicApiRequest extends NextRequest {
-  sunoApi: SunoApi;
-}
 
 function createHandler(method: HttpMethod, handler: RequestHandler): RequestHandler {
   return async (req: NextRequest) => {
     if (req.method === method) {
-      const musicApiRequest = req as MusicApiRequest;
-      musicApiRequest.sunoApi = await SunoApiFactory.getInstance().create();
-      
-      return await handler(musicApiRequest);
+      return await handler(req);
     } else {
       return new NextResponse('Method Not Allowed', {
         headers: {

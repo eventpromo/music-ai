@@ -1,59 +1,34 @@
-import { NextResponse, NextRequest } from "next/server";
-import { corsHeaders } from "@/lib/http/corsHeaders";
+import { NextRequest } from "next/server";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
-import sunoApiFactory from "@/lib/services/SunoApiFactory";
-import { options } from "@/lib/http/requests";
+import { SunoApiFactory } from "@/lib/services";
+import { options, post } from "@/lib/http/requests";
+import { errorResponse, okResponse } from "@/lib/http/responses";
 
 export const maxDuration = 60; // allow longer timeout for wait_audio == true
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  if (req.method === 'POST') {
-    try {
-      const body = await req.json();
-      const { prompt, tags, title, make_instrumental, model, wait_audio } = body;
-      const sunoApi = await sunoApiFactory.create();
-      const audioInfo = await (sunoApi).custom_generate(
-        prompt, tags, title,
-        Boolean(make_instrumental),
-        model || DEFAULT_MODEL,
-        Boolean(wait_audio)
-      );
-      return new NextResponse(JSON.stringify(audioInfo), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
-    } catch (error: any) {
-      console.error('Error generating custom audio:', error.response.data);
-      if (error.response.status === 402) {
-        return new NextResponse(JSON.stringify({ error: error.response.data.detail }), {
-          status: 402,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders
-          }
-        });
-      }
-      return new NextResponse(JSON.stringify({ error: 'Internal server error' }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
+export const POST = post(async (req: NextRequest) => {
+  try {
+    const body = await req.json();
+    const { prompt, tags, title, make_instrumental, model, wait_audio } = body;
+    const sunoApi = await SunoApiFactory.getInstance().create();
+    const audioInfo = await (sunoApi).custom_generate(
+      prompt, tags, title,
+      Boolean(make_instrumental),
+      model || DEFAULT_MODEL,
+      Boolean(wait_audio)
+    );
+    
+    return okResponse(audioInfo);
+  } catch (error: any) {
+    console.error('Error generating custom audio:', error.response.data);
+    
+    if (error.response.status === 402) {
+      return errorResponse({ error: error.response.data.detail }, 402);
     }
-  } else {
-    return new NextResponse('Method Not Allowed', {
-      headers: {
-        Allow: 'POST',
-        ...corsHeaders
-      },
-      status: 405
-    });
+
+    return errorResponse({ error: 'Internal server error' }, 500);
   }
-}
+});
 
 export { options as OPTIONS };

@@ -1,61 +1,32 @@
-import { NextResponse, NextRequest } from "next/server";
-import { corsHeaders } from "@/lib/http/corsHeaders";
-import sunoApiFactory from "@/lib/services/SunoApiFactory";
-import { options } from "@/lib/http/requests";
+import { NextRequest } from "next/server";
+import { SunoApiFactory } from "@/lib/services";
+import { options, post } from "@/lib/http/requests";
+import { errorResponse, okResponse } from "@/lib/http/responses";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  if (req.method === 'POST') {
-    try {
-      const body = await req.json();
-      const sunoApi = await sunoApiFactory.create();
-      const { clip_id } = body;
-      if (!clip_id) {
-        return new NextResponse(JSON.stringify({ error: 'Clip id is required' }), {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders
-          }
-        });
-      }
-      const audioInfo = await sunoApi.concatenate(clip_id);
-      return new NextResponse(JSON.stringify(audioInfo), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
-    } catch (error: any) {
-      console.error('Error generating concatenating audio:', error.response.data);
-      if (error.response.status === 402) {
-        return new NextResponse(JSON.stringify({ error: error.response.data.detail }), {
-          status: 402,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders
-          }
-        });
-      }
-      return new NextResponse(JSON.stringify({ error: 'Internal server error' }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
+export const POST = post(async (req: NextRequest) => {
+  try {
+    const body = await req.json();    
+    const { clip_id } = body;
+
+    if (!clip_id) {
+      return errorResponse({ error: 'Clip id is required' }, 400);
     }
-  } else {
-    return new NextResponse('Method Not Allowed', {
-      headers: {
-        Allow: 'POST',
-        ...corsHeaders
-      },
-      status: 405
-    });
+
+    const sunoApi = await SunoApiFactory.getInstance().create(clip_id);
+    const audioInfo = await sunoApi.concatenate(clip_id);
+    
+    return okResponse(audioInfo);
+  } catch (error: any) {
+    console.error('Error generating concatenating audio:', error.response.data);
+    
+    if (error.response.status === 402) {
+      return errorResponse({ error: error.response.data.detail }, 402);
+    }
+
+    return errorResponse({ error: 'Internal server error' }, 500);
   }
-}
+});
 
 export { options as OPTIONS };

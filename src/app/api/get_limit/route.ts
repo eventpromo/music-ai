@@ -1,11 +1,14 @@
-import { options, get, MusicApiRequest } from "@/lib/http/requests";
+import { options, get } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
+import { SunoApiFactory } from "@/lib/services";
+import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = get(async (req: MusicApiRequest) => {
+export const GET = get(async (req: NextRequest) => {
   try {      
-    const limit = await req.sunoApi.get_credits();
+    const sunoApi = await SunoApiFactory.getInstance().create();
+    const limit = await sunoApi.get_credits();
 
     return okResponse(limit);
   } catch (error) {

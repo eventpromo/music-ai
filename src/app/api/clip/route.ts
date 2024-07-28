@@ -1,55 +1,27 @@
-import { NextResponse, NextRequest } from "next/server";
-import { corsHeaders } from "@/lib/http/corsHeaders";
-import sunoApiFactory from "@/lib/services/SunoApiFactory";
-import { options } from "@/lib/http/requests";
+import { get, options } from "@/lib/http/requests";
+import { errorResponse, okResponse } from "@/lib/http/responses";
+import { SunoApiFactory } from "@/lib/services";
+import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
-  if (req.method === 'GET') {
-    try {
-      const url = new URL(req.url);
-      const sunoApi = await sunoApiFactory.getInstance().create();
-      const clipId = url.searchParams.get('id');
-      if (clipId == null) {
-        return new NextResponse(JSON.stringify({ error: 'Missing parameter id' }), {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders
-          }
-        });
-      }
-
-      const audioInfo = await (await sunoApi).getClip(clipId);
-
-      return new NextResponse(JSON.stringify(audioInfo), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching audio:', error);
-
-      return new NextResponse(JSON.stringify({ error: 'Internal server error' }), {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders
-        }
-      });
+export const GET = get(async (req: NextRequest) => {
+  try {
+    const url = new URL(req.url);
+    const clipId = url.searchParams.get('id');
+    if (clipId == null) {
+      return errorResponse({ error: 'Missing parameter id' }, 400);
     }
-  } else {
-    return new NextResponse('Method Not Allowed', {
-      headers: {
-        Allow: 'GET',
-        ...corsHeaders
-      },
-      status: 405
-    });
+
+    const sunoApi = await SunoApiFactory.getInstance().create(clipId);
+    const audioInfo = await sunoApi.getClip(clipId);
+
+    return okResponse(audioInfo);
+  } catch (error) {
+    console.error('Error fetching audio:', error);
+
+    return errorResponse({ error: 'Internal server error' }, 500);
   }
-}
+});
 
 export { options as OPTIONS };
