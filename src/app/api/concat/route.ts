@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { corsHeaders } from "@/lib/http/corsHeaders";
 import sunoApiFactory from "@/lib/services/SunoApiFactory";
+import { options } from "@/lib/http/requests";
 
 export const dynamic = "force-dynamic";
 
@@ -57,9 +58,4 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function OPTIONS(request: Request) {
-  return new Response(null, {
-    status: 200,
-    headers: corsHeaders
-  });
-}
+export { options as OPTIONS };
