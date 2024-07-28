@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import SunoApi from "@/lib/SunoApi";
-import sunoApiFactory from "../services/sunoApiFactory";
+import SunoApiFactory from "../services/SunoApiFactory";
 import { corsHeaders } from "./corsHeaders";
 
 type RequestHandler = (req: MusicApiRequest) => NextResponse | Promise<NextResponse>;
@@ -14,7 +14,7 @@ function createHandler(method: HttpMethod, handler: RequestHandler): RequestHand
   return async (req: NextRequest) => {
     if (req.method === method) {
       const musicApiRequest = req as MusicApiRequest;
-      musicApiRequest.sunoApi = await sunoApiFactory.create();
+      musicApiRequest.sunoApi = await SunoApiFactory.getInstance().create();
       
       return await handler(musicApiRequest);
     } else {

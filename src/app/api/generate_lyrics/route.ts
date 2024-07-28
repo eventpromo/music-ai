@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { corsHeaders } from "@/lib/http/corsHeaders";
-import sunoApiFactory from "@/lib/services/sunoApiFactory";
+import sunoApiFactory from "@/lib/services/SunoApiFactory";
 
 export const dynamic = "force-dynamic";
 

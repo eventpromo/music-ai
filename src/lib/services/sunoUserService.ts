@@ -1,11 +1,12 @@
-import { NextResponse, NextRequest } from "next/server";  
 import SunoUser from "../models/SunoUser";
+import { DbContext } from "@/db";
 
-
-class SunoUserService {
+export default class SunoUserService {
   private static instance: SunoUserService;
+  private dbContext: DbContext;
 
   private constructor() {
+    this.dbContext = DbContext.getInstance();
   }
 
   public static getInstance(): SunoUserService {
@@ -16,9 +17,19 @@ class SunoUserService {
     return SunoUserService.instance;
   }
 
-  public async getUser(): Promise<SunoUser> {
-    return { id: "1", cookie: 'John Doe' };
+  async getSunoUserById(id: string): Promise<SunoUser>{
+    const sunoUser = await this.dbContext.sunoUsersTable.findFirst({ with: { id } });
+    
+    if (sunoUser) {
+      return sunoUser;
+    }
+    
+    throw new Error(`Suno user with Id='${id}' not found`);
+  }
+
+  async getSunoUsers(): Promise<SunoUser[]>{
+    const sunoUsers = await this.dbContext.sunoUsersTable.findMany();
+        
+    return sunoUsers;
   }
 }
-
-export default SunoUserService.getInstance();

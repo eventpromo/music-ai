@@ -1,12 +1,21 @@
-import { drizzle, VercelPgDatabase } from 'drizzle-orm/vercel-postgres';
+import { drizzle } from 'drizzle-orm/vercel-postgres';
 import { sql } from "@vercel/postgres";
+import sunoSongsTable from './sunoSongsTable';
+import sunoUsersTable from './sunoUsersTable';
 
-class DbContext {
+export default class DbContext {
   private static instance: DbContext;
-  private vercelPgDatabase: VercelPgDatabase
+  private vercelPgDatabase;
   
   private constructor() {
-    this.vercelPgDatabase = drizzle(sql);
+    this.vercelPgDatabase = drizzle(sql,
+      {
+        schema: {
+          sunoSongsTable,
+          sunoUsersTable
+        }
+      }
+    );
   }
 
   public static getInstance(): DbContext {
@@ -17,9 +26,19 @@ class DbContext {
     return DbContext.instance;
   }
 
-  get db(): VercelPgDatabase {
+  get db() {
     return this.vercelPgDatabase;
   }
-}
 
-export default DbContext.getInstance().db;
+  get query() {
+    return this.db.query;
+  }
+
+  get sunoSongsTable() {
+    return this.query.sunoSongsTable;
+  }
+
+  get sunoUsersTable() {
+    return this.query.sunoUsersTable;
+  }
+}

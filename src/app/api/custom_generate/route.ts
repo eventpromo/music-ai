@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { corsHeaders } from "@/lib/http/corsHeaders";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
-import sunoApiFactory from "@/lib/services/sunoApiFactory";
+import sunoApiFactory from "@/lib/services/SunoApiFactory";
 
 export const maxDuration = 60; // allow longer timeout for wait_audio == true
 export const dynamic = "force-dynamic";
