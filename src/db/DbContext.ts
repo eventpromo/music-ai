@@ -8,7 +8,7 @@ import SunoUserEntity from './models/SunoUserEntity';
 export default class DbContext {
   private static instance: DbContext;
   private vercelPgDatabase;
-  
+
   private constructor() {
     this.vercelPgDatabase = drizzle(sql,
       {

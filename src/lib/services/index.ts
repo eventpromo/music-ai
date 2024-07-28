@@ -4,8 +4,8 @@ export {
 } from './SunoApiFactory';
 
 export {
-  default as SunoCookieArbitrator,
-  instance as sunoCookieArbitrator
+  default as SunoUserArbitrator,
+  instance as sunoUserArbitrator
 } from './SunoUserArbitrator';
 
 export {

@@ -1,14 +1,14 @@
 import SunoApi from "../SunoApi";
-import SunoCookieArbitrator from "./SunoUserArbitrator";
+import SunoUserArbitrator from "./SunoUserArbitrator";
 import SunoSongService from "./SunoSongService";
 
 export default class SunoApiFactory {
   private static instance: SunoApiFactory;
-  private sunoCookieArbitrator: SunoCookieArbitrator;
+  private sunoUserArbitrator: SunoUserArbitrator;
   private sunoSongService: SunoSongService;
 
   private constructor() {
-    this.sunoCookieArbitrator = SunoCookieArbitrator.getInstance();
+    this.sunoUserArbitrator = SunoUserArbitrator.getInstance();
     this.sunoSongService = SunoSongService.getInstance();
   }
 
@@ -27,7 +27,7 @@ export default class SunoApiFactory {
         const song = await this.sunoSongService.getSunoSongById(sunoSongId);
         sunoUserId = song.sunoUserId;
       }
-      const sunoUser = await this.sunoCookieArbitrator.getSunoUser(sunoUserId);
+      const sunoUser = await this.sunoUserArbitrator.getSunoUser(sunoUserId);
       const sunoApi = new SunoApi(sunoUser);
     
       return await sunoApi.init();
