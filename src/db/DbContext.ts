@@ -2,8 +2,6 @@ import { drizzle } from 'drizzle-orm/vercel-postgres';
 import { sql } from "@vercel/postgres";
 import sunoSongsTable from './sunoSongsTable';
 import sunoUsersTable from './sunoUsersTable';
-import SunoSongEntity from './models/SunoSongEntity';
-import SunoUserEntity from './models/SunoUserEntity';
 
 export default class DbContext {
   private static instance: DbContext;
@@ -42,7 +40,7 @@ export default class DbContext {
 
   public get sunoSongsTable() {
     return {
-      insert: (sunoSong: SunoSongEntity[]) => {
+      insert: (sunoSong: typeof sunoSongsTable.$inferInsert[]) => {
         return this.db.insert(sunoSongsTable).values(sunoSong);
       }
     }
@@ -54,7 +52,7 @@ export default class DbContext {
 
   public get sunoUsersTable() {
     return {
-      insert: (sunoUser: SunoUserEntity[]) => {
+      insert: (sunoUser: typeof sunoUsersTable.$inferInsert) => {
         return this.db.insert(sunoUsersTable).values(sunoUser);
       }
     }

@@ -73,7 +73,7 @@ export default class SunoUserArbitrator {
       this.isLoading = true; 
 
       try {
-        const sunoUsers = await this.sunoUserService.getSunoUsers();
+        const sunoUsers = await this.sunoUserService.getActiveSunoUsers();
         this.sunoUsers = sunoUsers.reduce((acc, sunoUser) => {
           acc.set(sunoUser.id, sunoUser);
           return acc;

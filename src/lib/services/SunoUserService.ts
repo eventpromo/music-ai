@@ -1,5 +1,6 @@
 import SunoUser from "../models/SunoUser";
 import { DbContext } from "@/db";
+import { SunoUserStatus } from "../models/SunoUser";
 
 export default class SunoUserService {
   private static instance: SunoUserService;
@@ -31,6 +32,16 @@ export default class SunoUserService {
 
   public async getSunoUsers(): Promise<SunoUser[]>{
     const sunoUsers = await this.dbContext.sunoUsersQuery.findMany();
+        
+    return sunoUsers;
+  }
+
+  public async getActiveSunoUsers(): Promise<SunoUser[]>{
+    const sunoUsers = await this.dbContext.sunoUsersQuery.findMany(
+      {
+        where: ((users, { eq }) => eq(users.status, SunoUserStatus.Active)),
+      }
+    );
         
     return sunoUsers;
   }
