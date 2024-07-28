@@ -1,4 +1,5 @@
-export default interface AudioInfo {
+// model for SunoApi
+export default interface SunoSongInfo {
   id: string; // Unique identifier for the audio
   title?: string; // Title of the audio
   image_url?: string; // URL of the image associated with the audio

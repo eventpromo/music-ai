@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { sunoApiFactory } from "@/lib/services";
+import { sunoApiFactory, sunoSongService } from "@/lib/services";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
 import { options, post } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
@@ -16,7 +16,7 @@ export const POST = post(async (req: NextRequest) => {
     }
 
     const sunoApi = await sunoApiFactory.create(audio_id);
-    const audioInfo = await sunoApi.extendAudio(
+    const sunoSongInfo = await sunoApi.extendAudio(
       audio_id,
       prompt,
       continue_at,
@@ -25,7 +25,13 @@ export const POST = post(async (req: NextRequest) => {
       model || DEFAULT_MODEL
     );
 
-    return okResponse(audioInfo);
+    const sunoSong = {
+      id: sunoSongInfo.id,
+      sunoUserId: sunoApi.currentUserId
+    };
+    await sunoSongService.createSunoSong(sunoSong);
+
+    return okResponse(sunoSongInfo);
   } catch (error: any) {
     console.error('Error extend audio:', JSON.stringify(error.response.data));
     

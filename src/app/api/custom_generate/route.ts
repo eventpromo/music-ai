@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
-import { sunoApiFactory } from "@/lib/services";
+import { sunoApiFactory, sunoSongService } from "@/lib/services";
 import { options, post } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
 
@@ -12,14 +12,21 @@ export const POST = post(async (req: NextRequest) => {
     const body = await req.json();
     const { prompt, tags, title, make_instrumental, model, wait_audio } = body;
     const sunoApi = await sunoApiFactory.create();
-    const audioInfo = await (sunoApi).custom_generate(
+    const sunoSongInfos = await (sunoApi).custom_generate(
       prompt, tags, title,
       Boolean(make_instrumental),
       model || DEFAULT_MODEL,
       Boolean(wait_audio)
     );
+
+    const songIds = new Set(sunoSongInfos.map(song => song.id));
+    const sunoSongs = Array.from(songIds).map(songId => ({
+      id: songId,
+      sunoUserId: sunoApi.currentUserId
+    }));
+    await sunoSongService.createManySunoSongs(sunoSongs);
     
-    return okResponse(audioInfo);
+    return okResponse(sunoSongInfos);
   } catch (error: any) {
     console.error('Error generating custom audio:', error.response.data);
     

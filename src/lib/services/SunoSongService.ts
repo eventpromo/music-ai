@@ -17,15 +17,25 @@ export default class SunoSongService {
     return SunoSongService.instance;
   }
 
-  async getSunoSongById(id: string): Promise<SunoSong> {
-    const sunoSong = await this.dbContext.sunoSongsTable.findFirst({ with: { id } });
+  public async getSunoSongById(sunoSongId: string): Promise<SunoSong> {
+    const sunoSong = await this.dbContext.sunoSongsQuery.findFirst({
+      where: ((songs, { eq }) => eq(songs.id, sunoSongId)),
+    });
 
     if (sunoSong) {
       return sunoSong;
     }
 
-    throw new Error(`Suno song with Id='${id}' not found`);
-  }  
+    throw new Error(`Suno song with Id='${sunoSongId}' not found`);
+  }
+
+  public async createSunoSong(sunoSong: SunoSong) {
+    await this.dbContext.sunoSongsTable.insert([sunoSong]);
+  } 
+
+  public async createManySunoSongs(sunoSongs: SunoSong[]) {
+    await this.dbContext.sunoSongsTable.insert(sunoSongs);
+  }
 }
 
 export const instance = SunoSongService.getInstance();

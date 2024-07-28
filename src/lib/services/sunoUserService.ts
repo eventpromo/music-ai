@@ -17,18 +17,20 @@ export default class SunoUserService {
     return SunoUserService.instance;
   }
 
-  async getSunoUserById(id: string): Promise<SunoUser>{
-    const sunoUser = await this.dbContext.sunoUsersTable.findFirst({ with: { id } });
+  public async getSunoUserById(sunoUserId: string): Promise<SunoUser>{
+    const sunoUser = await this.dbContext.sunoUsersQuery.findFirst({
+      where: ((users, { eq }) => eq(users.id, sunoUserId)),
+    });
     
     if (sunoUser) {
       return sunoUser;
     }
     
-    throw new Error(`Suno user with Id='${id}' not found`);
+    throw new Error(`Suno user with Id='${sunoUserId}' not found`);
   }
 
-  async getSunoUsers(): Promise<SunoUser[]>{
-    const sunoUsers = await this.dbContext.sunoUsersTable.findMany();
+  public async getSunoUsers(): Promise<SunoUser[]>{
+    const sunoUsers = await this.dbContext.sunoUsersQuery.findMany();
         
     return sunoUsers;
   }

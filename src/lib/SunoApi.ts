@@ -3,8 +3,9 @@ import UserAgent from 'user-agents';
 import pino from 'pino';
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar } from "tough-cookie";
-import { sleep } from "@/lib/http/utils";
-import AudioInfo from './models/AudioInfo';
+import SunoSongInfo from './models/SunoSongInfo';
+import SunoUser from './models/SunoUser';
+import { sleep } from './utils';
 
 const logger = pino();
 export const DEFAULT_MODEL = "chirp-v3-5";
@@ -16,16 +17,18 @@ export default class SunoApi {
   private readonly client: AxiosInstance;
   private sid?: string;
   private currentToken?: string;
+  private sunoUserId: string;
 
-  constructor(cookie: string) {
+  constructor(sunoUser: SunoUser) {
     const cookieJar = new CookieJar();
     const randomUserAgent = new UserAgent(/Chrome/).random().toString();
+    this.sunoUserId = sunoUser.id;
     this.client = wrapper(axios.create({
       jar: cookieJar,
       withCredentials: true,
       headers: {
         'User-Agent': randomUserAgent,
-        'Cookie': cookie
+        'Cookie': sunoUser.cookie
       }
     }))
     this.client.interceptors.request.use((config) => {
@@ -40,6 +43,10 @@ export default class SunoApi {
     await this.getAuthToken();
     await this.keepAlive();
     return this;
+  }
+
+  public get currentUserId() {
+    return this.sunoUserId;
   }
 
   /**
@@ -91,7 +98,7 @@ export default class SunoApi {
     model?: string,
     wait_audio: boolean = false,
 
-  ): Promise<AudioInfo[]> {
+  ): Promise<SunoSongInfo[]> {
     await this.keepAlive(false);
     const startTime = Date.now();
     const audios = this.generateSongs(prompt, false, undefined, undefined, make_instrumental, model, wait_audio);
@@ -107,7 +114,7 @@ export default class SunoApi {
    * @returns A promise that resolves to an AudioInfo object representing the concatenated audio.
    * @throws Error if the response status is not 200.
    */
-  public async concatenate(clip_id: string): Promise<AudioInfo> {
+  public async concatenate(clip_id: string): Promise<SunoSongInfo> {
     await this.keepAlive(false);
     const payload: any = { clip_id: clip_id };
 
@@ -141,7 +148,7 @@ export default class SunoApi {
     make_instrumental: boolean = false,
     model?: string,
     wait_audio: boolean = false,
-  ): Promise<AudioInfo[]> {
+  ): Promise<SunoSongInfo[]> {
     const startTime = Date.now();
     const audios = await this.generateSongs(prompt, true, tags, title, make_instrumental, model, wait_audio);
     const costTime = Date.now() - startTime;
@@ -169,7 +176,7 @@ export default class SunoApi {
     make_instrumental?: boolean,
     model?: string,
     wait_audio: boolean = false
-  ): Promise<AudioInfo[]> {
+  ): Promise<SunoSongInfo[]> {
     await this.keepAlive(false);
     const payload: any = {
       make_instrumental: make_instrumental == true,
@@ -207,7 +214,7 @@ export default class SunoApi {
     //Want to wait for music file generation
     if (wait_audio) {
       const startTime = Date.now();
-      let lastResponse: AudioInfo[] = [];
+      let lastResponse: SunoSongInfo[] = [];
       await sleep(5, 5);
       while (Date.now() - startTime < 100000) {
         const response = await this.get(songIds);
@@ -285,7 +292,7 @@ export default class SunoApi {
     tags: string = "",
     title: string = "",
     model?: string,
-  ): Promise<AudioInfo> {
+  ): Promise<SunoSongInfo> {
     const response = await this.client.post(`${SunoApi.BASE_URL}/api/generate/v2/`, {
       continue_clip_id: audioId,
       continue_at: continueAt,
@@ -322,7 +329,7 @@ export default class SunoApi {
    * @param songIds An optional array of song IDs to retrieve information for.
    * @returns A promise that resolves to an array of AudioInfo objects.
    */
-  public async get(songIds?: string[]): Promise<AudioInfo[]> {
+  public async get(songIds?: string[]): Promise<SunoSongInfo[]> {
     await this.keepAlive(false);
     let url = `${SunoApi.BASE_URL}/api/feed/`;
     if (songIds) {

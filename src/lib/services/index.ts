@@ -6,7 +6,7 @@ export {
 export {
   default as SunoCookieArbitrator,
   instance as sunoCookieArbitrator
-} from './SunoCookieArbitrator';
+} from './SunoUserArbitrator';
 
 export {
   default as SunoUserService,
