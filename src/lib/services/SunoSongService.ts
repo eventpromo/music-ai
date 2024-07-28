@@ -27,3 +27,5 @@ export default class SunoSongService {
     throw new Error(`Suno song with Id='${id}' not found`);
   }  
 }
+
+export const instance = SunoSongService.getInstance();

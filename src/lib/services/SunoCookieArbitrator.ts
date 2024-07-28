@@ -86,3 +86,5 @@ export default class SunoCookieArbitrator {
     }
   }
 }
+
+export const instance = SunoCookieArbitrator.getInstance();

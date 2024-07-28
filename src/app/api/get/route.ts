@@ -1,6 +1,6 @@
 import { get, options } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
-import { SunoApiFactory } from "@/lib/services";
+import { sunoApiFactory } from "@/lib/services";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export const GET = get(async (req: NextRequest) => {
     
     if (songIds && songIds.length > 0) {
       const idsArray = songIds.split(',');
-      const sunoApi = await SunoApiFactory.getInstance().create();
+      const sunoApi = await sunoApiFactory.create();
       audioInfo = await sunoApi.get(idsArray);
     } else {
       console.error('Error fetching audio: Missing parameter ids');

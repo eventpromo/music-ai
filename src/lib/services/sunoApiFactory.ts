@@ -36,3 +36,5 @@ export default class SunoApiFactory {
     }
   }
 }
+
+export const instance = SunoApiFactory.getInstance();

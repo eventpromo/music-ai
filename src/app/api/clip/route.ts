@@ -1,6 +1,6 @@
 import { get, options } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
-import { SunoApiFactory } from "@/lib/services";
+import { sunoApiFactory } from "@/lib/services";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export const GET = get(async (req: NextRequest) => {
       return errorResponse({ error: 'Missing parameter id' }, 400);
     }
 
-    const sunoApi = await SunoApiFactory.getInstance().create(clipId);
+    const sunoApi = await sunoApiFactory.create(clipId);
     const audioInfo = await sunoApi.getClip(clipId);
 
     return okResponse(audioInfo);

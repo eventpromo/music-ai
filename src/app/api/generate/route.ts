@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { SunoApiFactory } from "@/lib/services";
+import { sunoApiFactory } from "@/lib/services";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
 import { options, post } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
@@ -10,7 +10,7 @@ export const POST = post(async (req: NextRequest) => {
   try {
     const body = await req.json();
     const { prompt, make_instrumental, model, wait_audio } = body;
-    const sunoApi = await SunoApiFactory.getInstance().create();
+    const sunoApi = await sunoApiFactory.create();
 
     const audioInfo = await sunoApi.generate(
       prompt,

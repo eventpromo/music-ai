@@ -33,3 +33,5 @@ export default class SunoUserService {
     return sunoUsers;
   }
 }
+
+export const instance = SunoUserService.getInstance();

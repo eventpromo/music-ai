@@ -1,13 +1,13 @@
 import { options, get } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
-import { SunoApiFactory } from "@/lib/services";
+import { sunoApiFactory } from "@/lib/services";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export const GET = get(async (req: NextRequest) => {
   try {      
-    const sunoApi = await SunoApiFactory.getInstance().create();
+    const sunoApi = await sunoApiFactory.create();
     const limit = await sunoApi.get_credits();
 
     return okResponse(limit);

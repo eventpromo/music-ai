@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { SunoApiFactory } from "@/lib/services";
+import { sunoApiFactory } from "@/lib/services";
 import { options, post } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
 
@@ -14,7 +14,7 @@ export const POST = post(async (req: NextRequest) => {
       return errorResponse({ error: 'Clip id is required' }, 400);
     }
 
-    const sunoApi = await SunoApiFactory.getInstance().create(clip_id);
+    const sunoApi = await sunoApiFactory.create(clip_id);
     const audioInfo = await sunoApi.concatenate(clip_id);
     
     return okResponse(audioInfo);
