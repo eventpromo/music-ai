@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
-import { sunoApiFactory, sunoSongService } from "@/lib/services";
+import { sunoApiFactory } from "@/lib/services";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
 import { options, post } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
+import { queue } from "@/lib/queue";
+import { CreditsUsedEvent } from "@/lib/queue/events";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +27,9 @@ export const POST = post(async (req: NextRequest) => {
       model || DEFAULT_MODEL
     );
 
-    const sunoSong = {
-      id: sunoSongInfo.id,
-      sunoUserId: sunoApi.currentUserId
-    };
-    await sunoSongService.createSunoSong(sunoSong);
+    queue.emit(new CreditsUsedEvent({
+      sunoUserId: sunoApi.currentUserId,
+    }));
 
     return okResponse(sunoSongInfo);
   } catch (error: any) {

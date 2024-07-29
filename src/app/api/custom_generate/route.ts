@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
-import { sunoApiFactory, sunoSongService } from "@/lib/services";
+import { sunoApiFactory } from "@/lib/services";
 import { options, post } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
+import { queue } from "@/lib/queue";
+import { CreditsUsedEvent, SongsGeneratedEvent } from "@/lib/queue/events";
 
 export const maxDuration = 60; // allow longer timeout for wait_audio == true
 export const dynamic = "force-dynamic";
@@ -24,7 +26,11 @@ export const POST = post(async (req: NextRequest) => {
       id: songId,
       sunoUserId: sunoApi.currentUserId
     }));
-    await sunoSongService.createManySunoSongs(sunoSongs);
+
+    queue.emit(new SongsGeneratedEvent(sunoSongs));
+    queue.emit(new CreditsUsedEvent({
+      sunoUserId: sunoApi.currentUserId,
+    }));
     
     return okResponse(sunoSongInfos);
   } catch (error: any) {
