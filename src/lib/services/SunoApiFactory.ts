@@ -20,13 +20,24 @@ export default class SunoApiFactory {
     return SunoApiFactory.instance;
   }
 
-  public async create(sunoSongId?: string): Promise<SunoApi> {
+  public async createBySunoSongId(sunoSongId?: string | null): Promise<SunoApi> {
     try {
       let sunoUserId: string | undefined;
       if (sunoSongId) {
         const song = await this.sunoSongService.getSunoSongById(sunoSongId);
         sunoUserId = song.sunoUserId;
       }
+      const sunoUser = await this.sunoUserArbitrator.getSunoUser(sunoUserId);
+      const sunoApi = new SunoApi(sunoUser);
+    
+      return await sunoApi.init();
+    } catch (error) {
+      throw new Error(`Failed to create SunoApi: ${JSON.stringify(error)}`);
+    }
+  }
+
+  public async createBySunoUserId(sunoUserId?: string | null): Promise<SunoApi> {
+    try {
       const sunoUser = await this.sunoUserArbitrator.getSunoUser(sunoUserId);
       const sunoApi = new SunoApi(sunoUser);
     

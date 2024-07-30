@@ -13,7 +13,7 @@ export const GET = get(async (req: NextRequest) => {
       return errorResponse({ error: 'Missing parameter id' }, 400);
     }
 
-    const sunoApi = await sunoApiFactory.create(clipId);
+    const sunoApi = await sunoApiFactory.createBySunoSongId(clipId);
     const audioInfo = await sunoApi.getClip(clipId);
 
     return okResponse(audioInfo);

@@ -11,7 +11,7 @@ export const POST = post(async (req: NextRequest) => {
   try {
     const body = await req.json();
     const { prompt } = body;
-    const sunoApi = await sunoApiFactory.create();
+    const sunoApi = await sunoApiFactory.createBySunoSongId();
     const lyrics = await sunoApi.generateLyrics(prompt);
 
     queue.emit(new CreditsUsedEvent({

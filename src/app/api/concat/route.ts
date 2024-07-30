@@ -16,7 +16,7 @@ export const POST = post(async (req: NextRequest) => {
       return errorResponse({ error: 'Clip id is required' }, 400);
     }
 
-    const sunoApi = await sunoApiFactory.create(clip_id);
+    const sunoApi = await sunoApiFactory.createBySunoSongId(clip_id);
     const audioInfo = await sunoApi.concatenate(clip_id);
 
     queue.emit(new CreditsUsedEvent({

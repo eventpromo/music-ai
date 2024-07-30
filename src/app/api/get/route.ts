@@ -13,7 +13,7 @@ export const GET = get(async (req: NextRequest) => {
     
     if (songIds && songIds.length > 0) {
       const idsArray = songIds.split(',');
-      const sunoApi = await sunoApiFactory.create();
+      const sunoApi = await sunoApiFactory.createBySunoSongId();
       audioInfo = await sunoApi.get(idsArray);
     } else {
       console.error('Error fetching audio: Missing parameter ids');

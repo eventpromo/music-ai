@@ -20,7 +20,7 @@ export default class SunoUserArbitrator {
     return SunoUserArbitrator.instance;
   }
   
-  public async getSunoUser(sunoUserId?: string): Promise<SunoUser> {
+  public async getSunoUser(sunoUserId?: string | null): Promise<SunoUser> {
     try {
       await this.loadSunoUsers();
 

@@ -12,7 +12,7 @@ export const POST = post(async (req: NextRequest) => {
   try {
     const body = await req.json();
     const { prompt, make_instrumental, model, wait_audio } = body;
-    const sunoApi = await sunoApiFactory.create();
+    const sunoApi = await sunoApiFactory.createBySunoSongId();
 
     const sunoSongInfos = await sunoApi.generate(
       prompt,

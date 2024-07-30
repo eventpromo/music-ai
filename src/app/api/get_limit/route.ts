@@ -6,8 +6,10 @@ import { NextRequest } from "next/server";
 export const dynamic = "force-dynamic";
 
 export const GET = get(async (req: NextRequest) => {
-  try {      
-    const sunoApi = await sunoApiFactory.create();
+  try {
+    const url = new URL(req.url);
+    const sunoUserId = url.searchParams.get('userId');
+    const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUserId);
     const limit = await sunoApi.get_credits();
 
     return okResponse(limit);

@@ -17,7 +17,7 @@ export const POST = post(async (req: NextRequest) => {
       return errorResponse({ error: 'Audio id is required' }, 400);
     }
 
-    const sunoApi = await sunoApiFactory.create(audio_id);
+    const sunoApi = await sunoApiFactory.createBySunoSongId(audio_id);
     const sunoSongInfo = await sunoApi.extendAudio(
       audio_id,
       prompt,
