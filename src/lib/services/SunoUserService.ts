@@ -18,6 +18,10 @@ export default class SunoUserService {
     return SunoUserService.instance;
   }
 
+  public async blockUser(sunoUserId: string): Promise<void> {
+    await this.dbContext.sunoUsersTable.update(sunoUserId, { status: SunoUserStatus.Blocked });
+  }
+
   public async getSunoUserById(sunoUserId: string): Promise<SunoUser>{
     const sunoUser = await this.dbContext.sunoUsersQuery.findFirst({
       where: ((users, { eq }) => eq(users.id, sunoUserId)),

@@ -4,8 +4,9 @@ import pino from 'pino';
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar } from "tough-cookie";
 import SunoSongInfo from './models/SunoSongInfo';
-import SunoUser from './models/SunoUser';
+import SunoUser, { SunoUserCredits } from './models/SunoUser';
 import { sleep } from './utils';
+import { InvalidCookieError } from './models/exceptions';
 
 const logger = pino();
 export const DEFAULT_MODEL = "chirp-v3-5";
@@ -58,7 +59,7 @@ export default class SunoApi {
     // Get session ID
     const sessionResponse = await this.client.get(getSessionUrl);
     if (!sessionResponse?.data?.response?.['last_active_session_id']) {
-      throw new Error("Failed to get session id, you may need to update the SUNO_COOKIE");
+      throw new InvalidCookieError(this.sunoUserId, "Failed to get session id, you may need to update the SUNO_COOKIE");
     }
     // Save session ID for later use
     this.sid = sessionResponse.data.response['last_active_session_id'];
@@ -372,14 +373,15 @@ export default class SunoApi {
     return response.data;
   }
 
-  public async get_credits(): Promise<object> {
+  public async getCredits(): Promise<SunoUserCredits> {
     await this.keepAlive(false);
     const response = await this.client.get(`${SunoApi.BASE_URL}/api/billing/info/`);
+    
     return {
       credits_left: response.data.total_credits_left,
       period: response.data.period,
       monthly_limit: response.data.monthly_limit,
       monthly_usage: response.data.monthly_usage,
-    };
+    } as SunoUserCredits;
   }
 }

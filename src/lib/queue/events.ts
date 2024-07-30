@@ -3,7 +3,8 @@ import SunoUser from "../models/SunoUser";
 
 export enum EventTypes {
   SongsGenerated = "SongsGenerated",
-  CreditsUsed = "CreditsUsed"
+  CreditsUsed = "CreditsUsed",
+  CookieInvalidated = "CookieInvalidated",
 }
 
 export interface QueueEvent<TPayload> {
@@ -22,6 +23,15 @@ export class SongsGeneratedEvent implements QueueEvent<SunoSong[]> {
 
 export class CreditsUsedEvent implements QueueEvent<{ sunoUserId: string }> {
   type: EventTypes = EventTypes.CreditsUsed
+  payload: { sunoUserId: string };
+
+  constructor(payload: { sunoUserId: string }) {
+    this.payload = payload;
+  }
+}
+
+export class CookieInvalidatedEvent implements QueueEvent<{ sunoUserId: string }> {
+  type: EventTypes = EventTypes.CookieInvalidated
   payload: { sunoUserId: string };
 
   constructor(payload: { sunoUserId: string }) {

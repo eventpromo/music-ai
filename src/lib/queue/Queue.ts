@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { creditsUsedHandler, songGeneratedHandler } from "./handlers";
+import { cookieInvalidatedHandler, creditsUsedHandler, songGeneratedHandler } from "./handlers";
 import { EventTypes, QueueEvent } from "./events";
 
 export type QueueEventHandler<TPayload> = (payload: TPayload) => void;
@@ -43,6 +43,7 @@ export const oneByOne = <TPayload,>(handler: QueueEventHandler<TPayload>) => {
 const queue = Queue.getInstance();
 queue.on(EventTypes.SongsGenerated, oneByOne(songGeneratedHandler));
 queue.on(EventTypes.CreditsUsed, oneByOne(creditsUsedHandler));
+queue.on(EventTypes.CookieInvalidated, oneByOne(cookieInvalidatedHandler));
 
 export const instance = queue;
 

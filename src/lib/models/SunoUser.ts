@@ -1,6 +1,5 @@
 export enum SunoUserStatus {
   Active = 'active',
-  Limited = 'limited',
   Blocked = 'blocked'
 }
 
@@ -9,3 +8,11 @@ export default interface SunoUser {
   cookie: string;
   status: SunoUserStatus;
 }
+
+
+export interface SunoUserCredits {
+  credits_left: number,
+  period: string,
+  monthly_limit: number,
+  monthly_usage: number,
+};

@@ -2,6 +2,10 @@ import { drizzle } from 'drizzle-orm/vercel-postgres';
 import { sql } from "@vercel/postgres";
 import sunoSongsTable from './sunoSongsTable';
 import sunoUsersTable from './sunoUsersTable';
+import { eq } from 'drizzle-orm';
+
+type SunoUserInsertModel = typeof sunoUsersTable.$inferInsert
+type SunoUserUpdateModel = Partial<SunoUserInsertModel>;
 
 export default class DbContext {
   private static instance: DbContext;
@@ -52,8 +56,11 @@ export default class DbContext {
 
   public get sunoUsersTable() {
     return {
-      insert: (sunoUser: typeof sunoUsersTable.$inferInsert) => {
+      insert: (sunoUser: SunoUserInsertModel) => {
         return this.db.insert(sunoUsersTable).values(sunoUser);
+      },
+      update: (id: string, sunoUser: SunoUserUpdateModel) => {        
+        return this.db.update(sunoUsersTable).set(sunoUser).where(eq(sunoUsersTable.id, id))
       }
     }
   }

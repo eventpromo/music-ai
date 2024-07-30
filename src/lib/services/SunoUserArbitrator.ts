@@ -1,15 +1,17 @@
+import ICache, { sunoUsersCache } from "../cache";
 import SunoUser from "../models/SunoUser";
 import SunoUserService from "./SunoUserService";
 
 export default class SunoUserArbitrator {
   private static instance: SunoUserArbitrator;
   private sunoUserService: SunoUserService;
-  private sunoUsers: Map<string, SunoUser> | null = null;
-  private sunoUsersLastUpdated: Date | null = null;
+  private cache: ICache<SunoUser[]>;
+  private cacheKey: string = 'arbitrator';
   private isLoading: boolean = false;
   
   private constructor() {
     this.sunoUserService = SunoUserService.getInstance();
+    this.cache = sunoUsersCache;
   }
   
   public static getInstance() {
@@ -34,12 +36,21 @@ export default class SunoUserArbitrator {
     }
   }
 
+  public async reload(): Promise<void> {
+    this.cache.del(this.cacheKey);
+    await this.loadSunoUsers();
+  }
+
+  private get sunoUsers(): SunoUser[] | undefined {
+    return this.cache.get(this.cacheKey);
+  }
+
   private getUser(sunoUserId: string): SunoUser {
     if (!this.sunoUsers) {
       throw new Error('Suno users not loaded');
     }
 
-    const sunoUser = this.sunoUsers.get(sunoUserId);
+    const sunoUser = this.sunoUsers?.find(user => user.id === sunoUserId);
 
     if (sunoUser) {
       return sunoUser;
@@ -49,13 +60,13 @@ export default class SunoUserArbitrator {
   }
 
   private getRandomUser(): SunoUser {
-    if (!this.sunoUsers || this.sunoUsers.size === 0) {
+    const sunoUsers = this.cache.get(this.cacheKey);
+    if (!this.sunoUsers) {
       throw new Error('Users not loaded or empty');
     }
-    
-    const sunoUsers = Array.from(this.sunoUsers.values());
-    
-    return sunoUsers[Math.floor(Math.random() * sunoUsers.length)];
+
+    const cachedSunoUsers = this.sunoUsers;    
+    return cachedSunoUsers[Math.floor(Math.random() * cachedSunoUsers.length)];
   }
 
   private async loadSunoUsers() {
@@ -66,19 +77,12 @@ export default class SunoUserArbitrator {
       return;
     }
 
-    const needToUpdate = this.sunoUsersLastUpdated
-      && this.sunoUsersLastUpdated < new Date(Date.now() - 1000 * 60 * 30);
-
-    if (!this.sunoUsers || needToUpdate) {
+    if (!this.sunoUsers?.length) {
       this.isLoading = true; 
 
       try {
-        const sunoUsers = await this.sunoUserService.getActiveSunoUsers();
-        this.sunoUsers = sunoUsers.reduce((acc, sunoUser) => {
-          acc.set(sunoUser.id, sunoUser);
-          return acc;
-        }, new Map<string, SunoUser>());
-        this.sunoUsersLastUpdated = new Date();
+        const activeSunoUsers = await this.sunoUserService.getActiveSunoUsers();
+        this.cache.set(this.cacheKey, activeSunoUsers, 60 * 30); // 30 minutes
       } catch (error) {
         throw new Error(`Failed to load users: ${JSON.stringify(error)}`);
       } finally {
