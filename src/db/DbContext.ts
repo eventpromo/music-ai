@@ -13,8 +13,8 @@ export default class DbContext {
         schema: {
           sunoSongsTable,
           sunoUsersTable
-        }
-      }
+        },
+      },
     );
   }
 

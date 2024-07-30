@@ -1,10 +1,13 @@
-import './envConfig';
 import { defineConfig } from 'drizzle-kit';
+import dotenv from 'dotenv';
+
+dotenv.config();
  
+// this is for migrations and scripts
 export default defineConfig({
   schema: [
-    "./src/db/SunoUsersTable.ts",
-    "./src/db/SongsTable.ts",
+    "./src/db/sunoUsersTable.ts",
+    "./src/db/sunoSongsTable.ts",
   ],
   dialect: 'postgresql',
   dbCredentials: {
