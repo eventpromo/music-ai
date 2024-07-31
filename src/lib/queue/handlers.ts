@@ -26,7 +26,6 @@ export async function creditsUsedHandler(payload: typeof CreditsUsedEvent.protot
   }
 }
 
-
 export async function cookieInvalidatedHandler(payload: typeof CookieInvalidatedEvent.prototype.payload) {
   const { sunoUserId } = payload;
   await sunoUserService.blockUser(sunoUserId)
