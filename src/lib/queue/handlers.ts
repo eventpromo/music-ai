@@ -17,9 +17,10 @@ export async function creditsUsedHandler(sunoUser: SunoUser) {
     const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUser.id);
     const creditsLeft = await sunoApi.getCredits();
 
-    if(creditsLeft.)
-
-
+    if(creditsLeft.credits_left <= 0) {
+      await sunoUserService.blockUser(sunoUser.id);
+      await sunoUserArbitrator.reload();
+    }
   } catch(error) {
     if (error instanceof InvalidCookieError) {
       await sunoUserService.blockUser(sunoUser.id);

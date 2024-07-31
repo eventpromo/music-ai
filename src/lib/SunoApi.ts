@@ -6,7 +6,7 @@ import { CookieJar } from "tough-cookie";
 import SunoSongInfo from './models/SunoSongInfo';
 import SunoUser, { SunoUserCredits } from './models/SunoUser';
 import { sleep } from './utils';
-import { InvalidCookieError } from './models/exceptions';
+import { InvalidCookieError, SunoApiError } from './models/exceptions';
 
 const logger = pino();
 export const DEFAULT_MODEL = "chirp-v3-5";
@@ -36,6 +36,7 @@ export default class SunoApi {
       if (this.currentToken) { // Use the current token status
         config.headers['Authorization'] = `Bearer ${this.currentToken}`;
       }
+      
       return config;
     });
   }
@@ -43,6 +44,7 @@ export default class SunoApi {
   public async init(): Promise<SunoApi> {
     await this.getAuthToken();
     await this.keepAlive();
+    
     return this;
   }
 
@@ -104,8 +106,10 @@ export default class SunoApi {
     const startTime = Date.now();
     const audios = this.generateSongs(prompt, false, undefined, undefined, make_instrumental, model, wait_audio);
     const costTime = Date.now() - startTime;
+    
     logger.info("Generate Response:\n" + JSON.stringify(audios, null, 2));
     logger.info("Cost time: " + costTime);
+    
     return audios;
   }
 
@@ -126,9 +130,11 @@ export default class SunoApi {
         timeout: 10000, // 10 seconds timeout
       },
     );
+    
     if (response.status !== 200) {
-      throw new Error("Error response:" + response.statusText);
+      throw new SunoApiError(this.currentUserId, "Error response:" + response.statusText, response);
     }
+    
     return response.data;
   }
 
@@ -153,8 +159,10 @@ export default class SunoApi {
     const startTime = Date.now();
     const audios = await this.generateSongs(prompt, true, tags, title, make_instrumental, model, wait_audio);
     const costTime = Date.now() - startTime;
+    
     logger.info("Custom Generate Response:\n" + JSON.stringify(audios, null, 2));
     logger.info("Cost time: " + costTime);
+    
     return audios;
   }
 
@@ -184,6 +192,7 @@ export default class SunoApi {
       mv: model || DEFAULT_MODEL,
       prompt: "",
     };
+
     if (isCustom) {
       payload.tags = tags;
       payload.title = title;
@@ -191,6 +200,7 @@ export default class SunoApi {
     } else {
       payload.gpt_description_prompt = prompt;
     }
+
     logger.info("generateSongs payload:\n" + JSON.stringify({
       prompt: prompt,
       isCustom: isCustom,
@@ -207,15 +217,18 @@ export default class SunoApi {
         timeout: 10000, // 10 seconds timeout
       },
     );
+    
     logger.info("generateSongs Response:\n" + JSON.stringify(response.data, null, 2));
     if (response.status !== 200) {
-      throw new Error("Error response:" + response.statusText);
+      throw new SunoApiError(this.currentUserId, "Error response:" + response.statusText, response);
     }
+
     const songIds = response.data['clips'].map((audio: any) => audio.id);
     //Want to wait for music file generation
     if (wait_audio) {
       const startTime = Date.now();
       let lastResponse: SunoSongInfo[] = [];
+      
       await sleep(5, 5);
       while (Date.now() - startTime < 100000) {
         const response = await this.get(songIds);
@@ -225,16 +238,20 @@ export default class SunoApi {
         const allError = response.every(
           audio => audio.status === 'error'
         );
+
         if (allCompleted || allError) {
           return response;
         }
+
         lastResponse = response;
         await sleep(3, 6);
         await this.keepAlive(true);
       }
+      
       return lastResponse;
     } else {
       await this.keepAlive(true);
+      
       return response.data['clips'].map((audio: any) => ({
         id: audio.id,
         title: audio.title,
@@ -303,6 +320,7 @@ export default class SunoApi {
       title: title
     });
     console.log("response：\n", response);
+    
     return response.data;
   }
 

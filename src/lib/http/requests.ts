@@ -1,5 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
 import { corsHeaders } from "./corsHeaders";
+import { errorResponse } from "./responses";
+import { InvalidCookieError, SunoApiError } from "../models/exceptions";
+import { queue } from "../queue";
+import { CookieInvalidatedEvent } from "../queue/events";
 
 type RequestHandler = (req: NextRequest) => NextResponse | Promise<NextResponse>;
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS';
@@ -7,15 +11,34 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS';
 function createHandler(method: HttpMethod, handler: RequestHandler): RequestHandler {
   return async (req: NextRequest) => {
     if (req.method === method) {
-      return await handler(req);
+      try {
+        return await handler(req);
+      } catch (error) {
+        // TODO: Refactor this to a middleware
+
+        if (error instanceof InvalidCookieError) {
+          queue.emit(new CookieInvalidatedEvent({ sunoUserId: error.sunoUserId }));
+          
+          return errorResponse({ error: 'Invalid cookie. ', details: error.message }, 403);
+        }
+
+        if (error instanceof SunoApiError) {
+          if (error?.response) {
+            queue.emit(new CookieInvalidatedEvent({ sunoUserId: error.sunoUserId }));
+
+            if (error?.response.status) {
+              return errorResponse({
+                error: "Cookie is expired or credits are finished",
+                details: error.response.data?.detail
+              }, error.response.status);
+            }
+          } 
+        }
+
+        return errorResponse({ error: 'Internal server error: ', details: error }, 500);
+      }
     } else {
-      return new NextResponse('Method Not Allowed', {
-        headers: {
-          Allow: method,
-          ...corsHeaders
-        },
-        status: 405
-      });
+      return errorResponse('Method Not Allowed', 405);
     }
   }  
 }

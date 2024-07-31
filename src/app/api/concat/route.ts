@@ -8,31 +8,21 @@ import { CreditsUsedEvent } from "@/lib/queue/events";
 export const dynamic = "force-dynamic";
 
 export const POST = post(async (req: NextRequest) => {
-  try {
-    const body = await req.json();    
-    const { clip_id } = body;
+  const body = await req.json();    
+  const { clip_id } = body;
 
-    if (!clip_id) {
-      return errorResponse({ error: 'Clip id is required' }, 400);
-    }
-
-    const sunoApi = await sunoApiFactory.createBySunoSongId(clip_id);
-    const audioInfo = await sunoApi.concatenate(clip_id);
-
-    queue.emit(new CreditsUsedEvent({
-      sunoUserId: sunoApi.currentUserId,
-    }));
-    
-    return okResponse(audioInfo);
-  } catch (error: any) {
-    console.error('Error generating concatenating audio:', error.response.data);
-    
-    if (error.response.status === 402) {
-      return errorResponse({ error: error.response.data.detail }, 402);
-    }
-
-    return errorResponse({ error: 'Internal server error' }, 500);
+  if (!clip_id) {
+    return errorResponse({ error: 'Clip id is required' }, 400);
   }
+
+  const sunoApi = await sunoApiFactory.createBySunoSongId(clip_id);
+  const audioInfo = await sunoApi.concatenate(clip_id);
+
+  queue.emit(new CreditsUsedEvent({
+    sunoUserId: sunoApi.currentUserId,
+  }));
+  
+  return okResponse(audioInfo);
 });
 
 export { options as OPTIONS };
