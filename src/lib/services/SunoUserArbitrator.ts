@@ -46,7 +46,9 @@ export default class SunoUserArbitrator {
       throw new Error('Users not loaded or empty');
     }
    
-    return sunoUsers[Math.floor(Math.random() * sunoUsers.length)];
+    const randomIndex = Math.floor(Math.random() * sunoUsers.length);
+    
+    return sunoUsers[randomIndex];
   }
 }
 

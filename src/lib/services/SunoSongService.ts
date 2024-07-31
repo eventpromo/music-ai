@@ -17,6 +17,12 @@ export default class SunoSongService {
     return SunoSongService.instance;
   }
 
+  public async getSunoSongs(): Promise<SunoSong[]> {
+    const sunoSongs = await this.dbContext.sunoSongsQuery.findMany();
+
+    return sunoSongs;
+  }
+
   public async getSunoSongById(sunoSongId: string): Promise<SunoSong> {
     const sunoSong = await this.dbContext.sunoSongsQuery.findFirst({
       where: ((songs, { eq }) => eq(songs.id, sunoSongId)),

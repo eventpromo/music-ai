@@ -1,8 +1,8 @@
 import { sunoUserService } from "@/lib/services";
-import Section from "../components/Section";
+import Section from "../../components/Section";
 import { SunoUserStatus } from "@/lib/models/SunoUser";
 
-export default async function Admin() {
+export default async function AdminUsers() {
   const data = await sunoUserService.getSunoUsers();
 
   return (

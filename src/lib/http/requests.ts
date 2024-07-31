@@ -23,7 +23,7 @@ function createHandler(method: HttpMethod, handler: RequestHandler): RequestHand
         }
 
         if (error instanceof SunoApiError) {
-          if (error.response.status === 402) {
+          if (error.response.status === 402 || error.response.status === 403) {
             queue.emit(new CookieInvalidatedEvent({ sunoUserId: error.sunoUserId }));
           } 
 
