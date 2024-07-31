@@ -23,6 +23,8 @@ export default class SunoUserService {
 
   public async blockUser(sunoUserId: string): Promise<void> {
     await this.dbContext.sunoUsersTable.update(sunoUserId, { status: SunoUserStatus.Blocked });
+    this.cache.del('active');
+    this.cache.del('all');
   }
 
   public async getSunoUserById(sunoUserId: string): Promise<SunoUser>{

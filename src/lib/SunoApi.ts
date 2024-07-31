@@ -41,6 +41,13 @@ export default class SunoApi {
     });
   }
 
+  public restore(sid?: string, currentToken?: string) {
+    this.sid = sid;
+    this.currentToken = currentToken;
+
+    return this;
+  }
+
   public async init(): Promise<SunoApi> {
     await this.getAuthToken();
     await this.keepAlive();
@@ -50,6 +57,14 @@ export default class SunoApi {
 
   public get currentUserId() {
     return this.sunoUserId;
+  }
+
+  public get currentSessionId() {
+    return this.sid;
+  }
+
+  public get currentUserToken() {
+    return this.currentToken;
   }
 
   /**

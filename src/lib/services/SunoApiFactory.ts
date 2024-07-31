@@ -3,12 +3,13 @@ import SunoUserArbitrator from "./SunoUserArbitrator";
 import SunoSongService from "./SunoSongService";
 import { InvalidCookieError } from "../models/exceptions";
 import ICache, { sunoApiCache } from "../cache";
+import SunoApiState from "../models/SunoApiState";
 
 export default class SunoApiFactory {
   private static instance: SunoApiFactory;
   private sunoUserArbitrator: SunoUserArbitrator;
   private sunoSongService: SunoSongService;
-  private cache: ICache<SunoApi>;
+  private cache: ICache<SunoApiState>;
 
   private constructor() {
     this.sunoUserArbitrator = SunoUserArbitrator.getInstance();
@@ -36,14 +37,18 @@ export default class SunoApiFactory {
 
   public async createBySunoUserId(sunoUserId?: string | null): Promise<SunoApi> {
     try {
-      const cachedSunoApi = sunoUserId ? this.cache.get(sunoUserId) : null;
-      if (cachedSunoApi) {
-        return cachedSunoApi;
+      const sunoApiState = sunoUserId ? this.cache.get(sunoUserId) : null;
+      if (sunoApiState) {
+        return new SunoApi(sunoApiState.sunoUser).restore(sunoApiState.sid, sunoApiState.currentToken);
       }
       const sunoUser = await this.sunoUserArbitrator.getSunoUser(sunoUserId);
       const sunoApi = await new SunoApi(sunoUser).init();
 
-      this.cache.set(sunoApi.currentUserId, sunoApi, 60 * 30); // 30 minutes
+      this.cache.set(sunoApi.currentUserId, {
+        sunoUser: sunoUser,
+        sid: sunoApi.currentSessionId,
+        currentToken: sunoApi.currentUserToken,
+      }, 60 * 30); // 30 minutes
 
       return sunoApi;
     } catch (error) {      

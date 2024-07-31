@@ -7,7 +7,6 @@ export default class SunoUserArbitrator {
   
   private constructor() {
     this.sunoUserService = SunoUserService.getInstance();
-    this.cache = sunoUsersCache;
   }
   
   public static getInstance() {

@@ -1,5 +1,5 @@
 import NodeCache from 'node-cache';
-import SunoApi from '../SunoApi';
+import SunoApiState from '../models/SunoApiState';
 import SunoUser from '../models/SunoUser';
 
 const cache = new NodeCache({ checkperiod: 120 });
@@ -38,5 +38,5 @@ class Cache<TValue> implements ICache<TValue> {
   }
 }
 
-export const sunoApiCache = new Cache<SunoApi>('suno_api', cache);
+export const sunoApiCache = new Cache<SunoApiState>('suno_api', cache);
 export const sunoUsersCache = new Cache<SunoUser[]>('suno_users', cache);
