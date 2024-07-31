@@ -1,13 +1,9 @@
-import ICache, { sunoUsersCache } from "../cache";
-import SunoUser from "../models/SunoUser";
+import SunoUser, { SunoUserStatus } from "../models/SunoUser";
 import SunoUserService from "./SunoUserService";
 
 export default class SunoUserArbitrator {
   private static instance: SunoUserArbitrator;
   private sunoUserService: SunoUserService;
-  private cache: ICache<SunoUser[]>;
-  private cacheKey: string = 'arbitrator';
-  private isLoading: boolean = false;
   
   private constructor() {
     this.sunoUserService = SunoUserService.getInstance();
@@ -24,8 +20,6 @@ export default class SunoUserArbitrator {
   
   public async getSunoUser(sunoUserId?: string | null): Promise<SunoUser> {
     try {
-      await this.loadSunoUsers();
-
       if (!sunoUserId) {
         return this.getRandomUser();
       } else {
@@ -36,59 +30,24 @@ export default class SunoUserArbitrator {
     }
   }
 
-  public async reload(): Promise<void> {
-    this.cache.del(this.cacheKey);
-    await this.loadSunoUsers();
-  }
+  private async getUser(sunoUserId: string): Promise<SunoUser> {
 
-  private get sunoUsers(): SunoUser[] | undefined {
-    return this.cache.get(this.cacheKey);
-  }
+    const sunoUser = await this.sunoUserService.getSunoUserById(sunoUserId);
 
-  private getUser(sunoUserId: string): SunoUser {
-    if (!this.sunoUsers) {
-      throw new Error('Suno users not loaded');
-    }
-
-    const sunoUser = this.sunoUsers?.find(user => user.id === sunoUserId);
-
-    if (sunoUser) {
+    if (sunoUser && sunoUser.status === SunoUserStatus.Active) {
       return sunoUser;
     }
 
-    throw new Error(`No suno user found for user with Id='${sunoUserId}'`);;
+    throw new Error(`No active suno user found for user with Id='${sunoUserId}'`);;
   }
 
-  private getRandomUser(): SunoUser {
-    const sunoUsers = this.cache.get(this.cacheKey);
-    if (!this.sunoUsers) {
+  private async getRandomUser(): Promise<SunoUser> {
+    const sunoUsers = await this.sunoUserService.getActiveSunoUsers(true);
+    if (!sunoUsers) {
       throw new Error('Users not loaded or empty');
     }
-
-    const cachedSunoUsers = this.sunoUsers;    
-    return cachedSunoUsers[Math.floor(Math.random() * cachedSunoUsers.length)];
-  }
-
-  private async loadSunoUsers() {
-    if (this.isLoading) {
-      while (this.isLoading) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      return;
-    }
-
-    if (!this.sunoUsers?.length) {
-      this.isLoading = true; 
-
-      try {
-        const activeSunoUsers = await this.sunoUserService.getActiveSunoUsers();
-        this.cache.set(this.cacheKey, activeSunoUsers, 60 * 30); // 30 minutes
-      } catch (error) {
-        throw new Error(`Failed to load users: ${JSON.stringify(error)}`);
-      } finally {
-        this.isLoading = false;
-      }
-    }
+   
+    return sunoUsers[Math.floor(Math.random() * sunoUsers.length)];
   }
 }
 

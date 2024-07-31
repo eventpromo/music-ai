@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export const GET = get(async (req: NextRequest) => {
   const url = new URL(req.url);
   const clipId = url.searchParams.get('id');
+  
   if (clipId == null) {
     return errorResponse({ error: 'Missing parameter id' }, 400);
   }

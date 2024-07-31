@@ -8,7 +8,6 @@ import {
 export const statusEnum = pgEnum('status', [
   SunoUserStatus.Active,
   SunoUserStatus.Blocked,
-  SunoUserStatus.Limited
 ]);
 
 export default pgTable(

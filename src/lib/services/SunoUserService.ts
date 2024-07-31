@@ -1,13 +1,16 @@
 import SunoUser from "../models/SunoUser";
 import { DbContext } from "@/db";
 import { SunoUserStatus } from "../models/SunoUser";
+import ICache, { sunoUsersCache } from "../cache";
 
 export default class SunoUserService {
   private static instance: SunoUserService;
   private dbContext: DbContext;
+  private cache: ICache<SunoUser[]>;
 
   private constructor() {
     this.dbContext = DbContext.getInstance();
+    this.cache = sunoUsersCache;
   }
 
   public static getInstance(): SunoUserService {
@@ -34,18 +37,33 @@ export default class SunoUserService {
     throw new Error(`Suno user with Id='${sunoUserId}' not found`);
   }
 
-  public async getSunoUsers(): Promise<SunoUser[]>{
+  public async getSunoUsers(fromCache: boolean = false): Promise<SunoUser[]>{
+    if (fromCache) {
+      const sunoUsers = this.cache.get('all');
+      if (sunoUsers) {
+        return sunoUsers;
+      }
+    }
     const sunoUsers = await this.dbContext.sunoUsersQuery.findMany();
+    this.cache.set('all', sunoUsers, 60 * 30); // TTL = 30 minutes
         
     return sunoUsers;
   }
 
-  public async getActiveSunoUsers(): Promise<SunoUser[]>{
+  public async getActiveSunoUsers(fromCache: boolean = false): Promise<SunoUser[]>{
+    if (fromCache) {
+      const sunoUsers = this.cache.get('active');
+      if (sunoUsers) {
+        return sunoUsers;
+      }
+    }
+
     const sunoUsers = await this.dbContext.sunoUsersQuery.findMany(
       {
         where: ((users, { eq }) => eq(users.status, SunoUserStatus.Active)),
       }
     );
+    this.cache.set('active', sunoUsers, 60 * 30); // TTL = 30 minutes
         
     return sunoUsers;
   }
