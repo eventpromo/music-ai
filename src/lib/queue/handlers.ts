@@ -1,34 +1,33 @@
-import { InvalidCookieError } from "../models/exceptions";
-import SunoSong from "../models/SunoSong";
-import SunoUser from "../models/SunoUser";
+import { InvalidCookieError, SunoApiError } from "../models/exceptions";
 import { sunoApiFactory, sunoSongService, sunoUserService } from "../services";
+import { CookieInvalidatedEvent, CreditsUsedEvent, SongsGeneratedEvent } from "./events";
 
-export async function songGeneratedHandler(sunoSongs: SunoSong[]) {
-  if (sunoSongs.length > 1) {
-    await sunoSongService.createManySunoSongs(sunoSongs);
+export async function songGeneratedHandler(payload: typeof SongsGeneratedEvent.prototype.payload) {
+  if (payload.length > 1) {
+    await sunoSongService.createManySunoSongs(payload);
   } else {
-    await sunoSongService.createSunoSong(sunoSongs[0]);
+    await sunoSongService.createSunoSong(payload[0]);
   }
 }
 
-export async function creditsUsedHandler(sunoUser: SunoUser) {
-  
+export async function creditsUsedHandler(payload: typeof CreditsUsedEvent.prototype.payload) {  
   try {
-    const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUser.id);
+    const { sunoUserId } = payload;
+    const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUserId);
     const creditsLeft = await sunoApi.getCredits();
 
     if (creditsLeft.credits_left <= 0) {
-      await sunoUserService.blockUser(sunoUser.id);
+      await sunoUserService.blockUser(sunoUserId);
     }
   } catch(error) {
-    if (error instanceof InvalidCookieError) {
-      await sunoUserService.blockUser(sunoUser.id);
+    if (error instanceof InvalidCookieError || error instanceof SunoApiError) {
+      await sunoUserService.blockUser(error.sunoUserId);
     }
   }
-
-  await sunoUserService.blockUser(sunoUser.id);
 }
 
-export async function cookieInvalidatedHandler(sunoUser: SunoUser) {
-  await sunoUserService.blockUser(sunoUser.id);
+
+export async function cookieInvalidatedHandler(payload: typeof CookieInvalidatedEvent.prototype.payload) {
+  const { sunoUserId } = payload;
+  await sunoUserService.blockUser(sunoUserId)
 }

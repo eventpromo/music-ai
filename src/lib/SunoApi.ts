@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import UserAgent from 'user-agents';
 import pino from 'pino';
 import { wrapper } from "axios-cookiejar-support";
@@ -41,13 +41,6 @@ export default class SunoApi {
     });
   }
 
-  public restore(sid?: string, currentToken?: string) {
-    this.sid = sid;
-    this.currentToken = currentToken;
-
-    return this;
-  }
-
   public async init(): Promise<SunoApi> {
     await this.getAuthToken();
     await this.keepAlive();
@@ -57,14 +50,6 @@ export default class SunoApi {
 
   public get currentUserId() {
     return this.sunoUserId;
-  }
-
-  public get currentSessionId() {
-    return this.sid;
-  }
-
-  public get currentUserToken() {
-    return this.currentToken;
   }
 
   /**
@@ -225,13 +210,20 @@ export default class SunoApi {
       wait_audio: wait_audio,
       payload: payload,
     }, null, 2));
-    const response = await this.client.post(
-      `${SunoApi.BASE_URL}/api/generate/v2/`,
-      payload,
-      {
-        timeout: 10000, // 10 seconds timeout
-      },
-    );
+
+    let response;
+
+    try {
+      response = await this.client.post(
+        `${SunoApi.BASE_URL}/api/generate/v2/`,
+        payload,
+        {
+          timeout: 10000, // 10 seconds timeout
+        },
+      );
+    } catch (error: any) {
+      throw new SunoApiError(this.currentUserId, "Error response: " + error.message, error.response);
+    }
     
     logger.info("generateSongs Response:\n" + JSON.stringify(response.data, null, 2));
     if (response.status !== 200) {

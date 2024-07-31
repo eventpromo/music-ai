@@ -23,16 +23,18 @@ function createHandler(method: HttpMethod, handler: RequestHandler): RequestHand
         }
 
         if (error instanceof SunoApiError) {
-          if (error?.response) {
+          if (error.response.status === 402) {
             queue.emit(new CookieInvalidatedEvent({ sunoUserId: error.sunoUserId }));
-
-            if (error?.response.status) {
-              return errorResponse({
-                error: "Cookie is expired or credits are finished",
-                details: error.response.data?.detail
-              }, error.response.status);
-            }
           } 
+
+          return errorResponse({
+            error: "Cookie is expired or credits are finished",
+            details: {
+              message: error.response.data?.detail?.message,
+              name: error.response.data?.detail?.name,
+              stack: error.response.data?.detail?.stack,
+            }
+          }, error.response.status);
         }
 
         return errorResponse({ error: 'Internal server error: ', details: error }, 500);
