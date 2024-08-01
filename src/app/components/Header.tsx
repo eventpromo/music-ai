@@ -40,10 +40,10 @@ export default function Header() {
                             <span>Github</span>
                         </a>
                     </p>
+                    <p className="p-2 lg:px-6 lg:py-3 rounded-full flex justify-center items-center lg:hover:bg-indigo-300 duration-200">
+                       <Link href="/api/auth/login">Login</Link>
+                    </p>
                 </div>
-
-
-
             </div>
         </nav>
     );

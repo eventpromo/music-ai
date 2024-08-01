@@ -1,7 +1,8 @@
 import { sunoSongService } from "@/lib/services";
 import Section from "../../components/Section";
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 
-export default async function AdminSongs() {
+export default withPageAuthRequired(async function AdminSongs() {
   const sunoSongs = await sunoSongService.getSunoSongs();
 
   return (
@@ -21,4 +22,4 @@ export default async function AdminSongs() {
       </div>
     </div>
   );
-}
+}, { returnTo: '/' });
