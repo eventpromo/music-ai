@@ -11,22 +11,14 @@ export async function songGeneratedHandler(payload: typeof SongsGeneratedEvent.p
 }
 
 export async function creditsUsedHandler(payload: typeof CreditsUsedEvent.prototype.payload) {  
-  try {
-    const { sunoUserId } = payload;
-    const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUserId);
-    const creditsLeft = await sunoApi.getCredits();
+  const { sunoUserId } = payload;
+  const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUserId);
+  const sunoUserCredits = await sunoApi.getCredits();
 
-    if (creditsLeft.credits_left <= 0) {
-      await sunoUserService.blockUser(sunoUserId);
-    }
-  } catch(error) {
-    if (error instanceof InvalidCookieError || error instanceof SunoApiError) {
-      await sunoUserService.blockUser(error.sunoUserId);
-    }
-  }
+  await sunoUserService.updateSunoUserCredits(sunoUserId, sunoUserCredits.creditsLeft);
 }
 
 export async function cookieInvalidatedHandler(payload: typeof CookieInvalidatedEvent.prototype.payload) {
   const { sunoUserId } = payload;
-  await sunoUserService.blockUser(sunoUserId)
+  await sunoUserService.blockSunoUser(sunoUserId)
 }

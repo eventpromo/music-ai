@@ -403,10 +403,10 @@ export default class SunoApi {
     const response = await this.client.get(`${SunoApi.BASE_URL}/api/billing/info/`);
     
     return {
-      credits_left: response.data.total_credits_left,
+      creditsLeft: response.data.total_credits_left,
       period: response.data.period,
-      monthly_limit: response.data.monthly_limit,
-      monthly_usage: response.data.monthly_usage,
+      monthlyLimit: response.data.monthly_limit,
+      monthlyLsage: response.data.monthly_usage,
     } as SunoUserCredits;
   }
 }

@@ -1,6 +1,5 @@
-import { sunoSongService, sunoUserService } from "@/lib/services";
+import { sunoSongService } from "@/lib/services";
 import Section from "../../components/Section";
-import { SunoUserStatus } from "@/lib/models/SunoUser";
 
 export default async function AdminSongs() {
   const sunoSongs = await sunoSongService.getSunoSongs();

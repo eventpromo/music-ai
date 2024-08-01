@@ -7,12 +7,12 @@ export default interface SunoUser {
   id: string;
   cookie: string;
   status: SunoUserStatus;
+  creditsLeft?: number | null;
 }
 
-
 export interface SunoUserCredits {
-  credits_left: number,
+  creditsLeft: number,
   period: string,
-  monthly_limit: number,
-  monthly_usage: number,
+  monthlyLimit: number,
+  monthlyLsage: number,
 };

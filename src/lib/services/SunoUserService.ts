@@ -21,10 +21,26 @@ export default class SunoUserService {
     return SunoUserService.instance;
   }
 
-  public async blockUser(sunoUserId: string): Promise<void> {
+  public async updateCookie(sunoUserId: string, cookie: string): Promise<void> {
+    await this.dbContext.sunoUsersTable.update(sunoUserId, {
+      cookie,
+      status: SunoUserStatus.Active
+    });
+    this.clearCache();
+  }
+
+  public async updateSunoUserCredits(sunoUserId: string, creditsLeft: number): Promise<void> {
+    await this.dbContext.sunoUsersTable.update(sunoUserId, {
+      creditsLeft,
+      status: creditsLeft <= 0 ? SunoUserStatus.Blocked : SunoUserStatus.Active,
+    });
+
+    this.clearCache();
+  }
+
+  public async blockSunoUser(sunoUserId: string): Promise<void> {
     await this.dbContext.sunoUsersTable.update(sunoUserId, { status: SunoUserStatus.Blocked });
-    this.cache.del('active');
-    this.cache.del('all');
+    this.clearCache();
   }
 
   public async getSunoUserById(sunoUserId: string): Promise<SunoUser>{
@@ -68,6 +84,11 @@ export default class SunoUserService {
     this.cache.set('active', sunoUsers, 60 * 30); // TTL = 30 minutes
         
     return sunoUsers;
+  }
+
+  private clearCache(): void {
+    this.cache.del('active');
+    this.cache.del('all');
   }
 }
 

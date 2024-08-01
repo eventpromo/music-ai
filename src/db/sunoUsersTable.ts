@@ -2,7 +2,8 @@ import { SunoUserStatus } from '@/lib/models/SunoUser';
 import {
   pgTable,
   text,
-  pgEnum
+  pgEnum,
+  integer
 } from 'drizzle-orm/pg-core';
 
 export const statusEnum = pgEnum('status', [
@@ -15,6 +16,7 @@ export default pgTable(
   {
     id: text('id').primaryKey(),
     cookie: text('cookie').notNull(),
-    status: statusEnum('status').notNull()
+    status: statusEnum('status').notNull(),
+    creditsLeft: integer('credits_left')
   },
 );

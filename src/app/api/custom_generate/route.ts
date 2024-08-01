@@ -12,7 +12,8 @@ export const dynamic = "force-dynamic";
 export const POST = post(async (req: NextRequest) => {
   const body = await req.json();
   const { prompt, tags, title, make_instrumental, model, wait_audio } = body;
-  const sunoApi = await sunoApiFactory.createBySunoSongId();
+  
+  const sunoApi = await sunoApiFactory.createBySunoUserId();
   const sunoSongInfos = await sunoApi.custom_generate(
     prompt, tags, title,
     Boolean(make_instrumental),
