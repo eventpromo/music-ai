@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 export default function Footer() {
     return (
@@ -16,7 +15,7 @@ export default function Footer() {
                 ">
                 <span>© 2024</span>
                 <Link href="https://github.com/gcui-art/suno-api/">
-                    gcui-art/suno-api
+                    music-ai
                 </Link>
             </p>
         </footer>

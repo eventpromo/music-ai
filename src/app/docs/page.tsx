@@ -1,6 +1,6 @@
 import React from 'react';
 import Swagger from '../components/Swagger';
-import spec from './swagger-suno-api.json'; // 直接导入JSON文件
+import spec from './swagger-suno-api.json';
 import Section from '../components/Section';
 import Markdown from 'react-markdown';
 
@@ -16,7 +16,7 @@ export default function Docs() {
                     <Markdown>
                         {`                     
 ---
-\`gcui-art/suno-api\` currently mainly implements the following APIs:
+\`music-ai\` currently mainly implements the following APIs:
 
 \`\`\`bash
 - \`/api/generate\`: Generate music
@@ -43,9 +43,6 @@ Feel free to explore the detailed API parameters and conduct tests on this page.
                     <h2 className='text-center'>
                         Details of the API and testing it online
                     </h2>
-                    <p className='text-red-800 italic'>
-                        This is just a demo, bound to a test account. Please do not use it frequently, so that more people can test online.
-                    </p>
                 </article>
 
                 <div className=' border p-4 rounded-2xl shadow-xl hover:shadow-none duration-200'>

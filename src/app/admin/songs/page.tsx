@@ -6,9 +6,10 @@ export default withPageAuthRequired(async function AdminSongs() {
   const sunoSongs = await sunoSongService.getSunoSongs();
 
   return (
-    <div className="flex flex-col w-full gap-4">
-      <Section><h1 className="font-medium text-xl text-indigo-900 flex items-center">Suno Songs</h1></Section>
-      <div className="flex flex-col w-full justify-center items-center gap-4">
+    <Section className="my-10 flex flex-col w-full gap-4">
+      <article className="prose lg:prose-lg max-w-4xl">          
+        <h1 className="text-xl text-indigo-900 text-center flex">Suno Songs: </h1>
+        <div className="flex flex-col w-full justify-center items-center gap-4">
           {sunoSongs.map((song) => (
             <div key={song.id} className="flex flex-col gap-1">
               <div>
@@ -19,7 +20,8 @@ export default withPageAuthRequired(async function AdminSongs() {
               </div>
             </div>
           ))}
-      </div>
-    </div>
+        </div>        
+      </article>
+    </Section>
   );
 }, { returnTo: '/' });

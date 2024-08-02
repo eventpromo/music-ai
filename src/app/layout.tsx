@@ -9,10 +9,10 @@ import { UserProvider } from '@auth0/nextjs-auth0/client';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "suno api",
+  title: "music ai",
   description: "Use API to call the music generation ai of suno.ai",
   keywords: ["suno", "suno api", "suno.ai", "api", "music", "generation", "ai"],
-  creator: "@gcui.ai",
+  creator: "Peda & Co",
 };
 
 export default function RootLayout({

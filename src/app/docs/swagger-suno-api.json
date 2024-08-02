@@ -1,9 +1,9 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
-    "title": "suno-api",
+    "title": "music-ai-api",
     "description": "Use API to call the music generation service of Suno.ai and easily integrate it into agents like GPTs.",
-    "version": "1.1.0"
+    "version": "1.0.0"
   },
   "tags": [
     {
@@ -15,13 +15,19 @@
       "post": {
         "summary": "Generate audio based on Prompt.",
         "description": "It will automatically fill in the lyrics.\n\n2 audio files will be generated for each request, consuming a total of 10 credits.\n\n`wait_audio` can be set to API mode:\n\n\u2022 By default, it is set to `false`, which indicates the background mode. It will only return audio task information, and you will need to call the get API to retrieve detailed audio information.\n\n\u2022 If set to `true`, it simulates synchronous mode. The API will wait for a maximum of 100s until the audio is generated, and will directly return the audio link and other information. Recommend using in GPTs and other agents.",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["prompt", "make_instrumental", "wait_audio"],
+                "required": [
+                  "prompt",
+                  "make_instrumental",
+                  "wait_audio"
+                ],
                 "properties": {
                   "prompt": {
                     "type": "string",
@@ -57,7 +63,10 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": ["0", "1"],
+                    "required": [
+                      "0",
+                      "1"
+                    ],
                     "properties": [
                       {
                         "$ref": "#/components/schemas/audio_info"
@@ -78,13 +87,17 @@
       "post": {
         "summary": "Generate audio based on Prompt - OpenAI API format compatibility.",
         "description": "Convert the `/api/generate` API to be compatible with the OpenAI `/v1/chat/completions` API format. \n\nGenerally used in OpenAI compatible clients.",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["prompt"],
+                "required": [
+                  "prompt"
+                ],
                 "properties": {
                   "prompt": {
                     "type": "string",
@@ -120,13 +133,19 @@
       "post": {
         "summary": "Generate Audio - Custom Mode",
         "description": "The custom mode enables users to provide additional details about the music, such as music genre, lyrics, and more.\n\n 2 audio files will be generated for each request, consuming a total of 10 credits. \n\n `wait_audio` can be set to API mode:\n\n\u2022 By default, it is set to false, which indicates the background mode. It will only return audio task information, and you will need to call the get API to retrieve detailed audio information.\n\n\u2022 If set to true, it simulates synchronous mode. The API will wait for a maximum of 100s until the audio is generated, and will directly return the audio link and other information. Recommend using in GPTs and other agents.",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["prompt", "tags", "title"],
+                "required": [
+                  "prompt",
+                  "tags",
+                  "title"
+                ],
                 "properties": {
                   "prompt": {
                     "type": "string",
@@ -172,7 +191,10 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": ["0", "1"],
+                    "required": [
+                      "0",
+                      "1"
+                    ],
                     "properties": [
                       {
                         "$ref": "#/components/schemas/audio_info"
@@ -193,13 +215,17 @@
       "post": {
         "summary": "Extend audio length.",
         "description": "Extend audio length.",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["audio_id"],
+                "required": [
+                  "audio_id"
+                ],
                 "properties": {
                   "audio_id": {
                     "type": "string",
@@ -242,13 +268,17 @@
       "post": {
         "summary": "Generate lyrics based on Prompt.",
         "description": "Generate lyrics based on Prompt.",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["prompt"],
+                "required": [
+                  "prompt"
+                ],
                 "properties": {
                   "prompt": {
                     "type": "string",
@@ -292,13 +322,15 @@
       "get": {
         "summary": "Get audio information",
         "description": "",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "parameters": [
           {
             "in": "query",
             "name": "ids",
-            "description": "Audio IDs, separated by commas. Leave blank to return a list of all music.",
-            "required": false,
+            "description": "Audio IDs, separated by commas.",
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -313,7 +345,10 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": ["0", "1"],
+                    "required": [
+                      "0",
+                      "1"
+                    ],
                     "properties": [
                       {
                         "$ref": "#/components/schemas/audio_info"
@@ -334,7 +369,20 @@
       "get": {
         "summary": "Get quota information.",
         "description": "",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "userId",
+            "description": "Suno User Id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "success",
@@ -377,7 +425,9 @@
       "get": {
         "summary": "Get clip information based on ID.",
         "description": "Retrieve specific clip information using the provided clip ID as a query parameter.",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -439,13 +489,17 @@
       "post": {
         "summary": "Generate the whole song from extensions.",
         "description": "Concatenate audio clips to generate a complete song using the provided clip ID.",
-        "tags": ["default"],
+        "tags": [
+          "default"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["clip_id"],
+                "required": [
+                  "clip_id"
+                ],
                 "properties": {
                   "clip_id": {
                     "type": "string",
