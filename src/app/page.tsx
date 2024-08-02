@@ -125,10 +125,10 @@ For more detailed documentation, please check out the demo site:
             Unofficial
           </span>
           <h1 className="font-bold text-7xl flex text-white/90">
-            Suno AI API
+            MUSIC AI
           </h1>
           <p className="text-white/80 text-lg">
-            `Suno-api` is an open-source project that enables you to set up your own Suno AI API.
+            `MUSIC AI` is an project that enables you to build up your own Suno AI API.
           </p>
         </div>
 

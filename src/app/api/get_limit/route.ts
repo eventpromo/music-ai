@@ -11,6 +11,11 @@ export const dynamic = "force-dynamic";
 export const GET = get(async (req: NextRequest) => {
   const url = new URL(req.url);
   const sunoUserId = url.searchParams.get('userId');
+
+  if (!sunoUserId) {
+    return errorResponse({ error: 'Missing parameter sunoUserId' }, 400);
+  }  
+
   const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUserId);
   const limit = await sunoApi.getCredits();
 
