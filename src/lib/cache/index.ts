@@ -8,7 +8,7 @@ export default interface ICache<TValue> {
 
   get(key: string): TValue | undefined;
 
-  set(key: string, value: TValue, ttl: number): void;
+  set(key: string, value: TValue, ttl?: number): void;
 
   del(key: string): void;
 }
@@ -38,3 +38,4 @@ class Cache<TValue> implements ICache<TValue> {
 }
 
 export const sunoUsersCache = new Cache<SunoUser[]>('suno_users', cache);
+export const sunoUserCache = new Cache<SunoUser>('suno_user', cache);

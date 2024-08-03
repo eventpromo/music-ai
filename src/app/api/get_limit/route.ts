@@ -1,9 +1,6 @@
 import { options, get } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
-import { InvalidCookieError } from "@/lib/models/exceptions";
-import { queue } from "@/lib/queue";
-import { CookieInvalidatedEvent } from "@/lib/queue/events";
-import { sunoApiFactory } from "@/lib/services";
+import { getCurrentSunoUser, sunoApiFactory } from "@/lib/services";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +13,8 @@ export const GET = get(async (req: NextRequest) => {
     return errorResponse({ error: 'Missing parameter sunoUserId' }, 400);
   }  
 
-  const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUserId);
+  const currentSunoUser = await getCurrentSunoUser({ sunoUserId: sunoUserId});
+  const sunoApi = await sunoApiFactory.createBySunoUser(currentSunoUser);
   const limit = await sunoApi.getCredits();
 
   return okResponse(limit);

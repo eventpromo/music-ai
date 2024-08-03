@@ -1,4 +1,3 @@
-import { InvalidCookieError, SunoApiError } from "../models/exceptions";
 import { sunoApiFactory, sunoSongService, sunoUserService } from "../services";
 import { CookieInvalidatedEvent, CreditsUsedEvent, SongsGeneratedEvent } from "./events";
 
@@ -12,13 +11,18 @@ export async function songGeneratedHandler(payload: typeof SongsGeneratedEvent.p
 
 export async function creditsUsedHandler(payload: typeof CreditsUsedEvent.prototype.payload) {  
   const { sunoUserId } = payload;
-  const sunoApi = await sunoApiFactory.createBySunoUserId(sunoUserId);
+  const sunoUser = await sunoUserService.getSunoUserById(sunoUserId);
+  const sunoApi = await sunoApiFactory.createBySunoUser(sunoUser);
   const sunoUserCredits = await sunoApi.getCredits();
 
   await sunoUserService.updateSunoUserCredits(sunoUserId, sunoUserCredits.creditsLeft);
 }
 
 export async function cookieInvalidatedHandler(payload: typeof CookieInvalidatedEvent.prototype.payload) {
-  const { sunoUserId } = payload;
-  await sunoUserService.blockSunoUser(sunoUserId)
+  const { sunoUserId, noCredits } = payload;
+  if (noCredits) {
+    await sunoUserService.updateSunoUserCredits(sunoUserId, 0);
+  } else {
+    await sunoUserService.blockSunoUser(sunoUserId);
+  }
 }

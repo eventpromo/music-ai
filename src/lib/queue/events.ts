@@ -32,9 +32,9 @@ export class CreditsUsedEvent implements QueueEvent<{ sunoUserId: string }> {
 
 export class CookieInvalidatedEvent implements QueueEvent<{ sunoUserId: string }> {
   type: EventTypes = EventTypes.CookieInvalidated
-  payload: { sunoUserId: string };
+  payload: { sunoUserId: string, noCredits?: boolean };
 
-  constructor(payload: { sunoUserId: string }) {
+  constructor(payload: { sunoUserId: string, noCredits?: boolean }) {
     this.payload = payload;
   }
 }

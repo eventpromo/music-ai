@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 
 type SunoUserInsertModel = typeof sunoUsersTable.$inferInsert
 type SunoUserUpdateModel = Partial<SunoUserInsertModel>;
+type SunoUserSelectModel = typeof sunoUsersTable.$inferSelect;
 
 export default class DbContext {
   private static instance: DbContext;

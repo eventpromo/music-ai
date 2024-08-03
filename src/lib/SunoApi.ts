@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import UserAgent from 'user-agents';
 import pino from 'pino';
 import { wrapper } from "axios-cookiejar-support";
@@ -6,7 +6,7 @@ import { CookieJar } from "tough-cookie";
 import SunoSongInfo from './models/SunoSongInfo';
 import SunoUser, { SunoUserCredits } from './models/SunoUser';
 import { sleep } from './utils';
-import { InvalidCookieError, SunoApiError } from './models/exceptions';
+import { SunoApiError } from './models/exceptions';
 
 const logger = pino();
 export const DEFAULT_MODEL = "chirp-v3-5";
@@ -61,7 +61,14 @@ export default class SunoApi {
     // Get session ID
     const sessionResponse = await this.client.get(getSessionUrl);
     if (!sessionResponse?.data?.response?.['last_active_session_id']) {
-      throw new InvalidCookieError(this.sunoUserId, "Failed to get session id, you may need to update the SUNO_COOKIE");
+      throw new SunoApiError(
+        this.sunoUserId, "Failed to get session id, you may need to update the SUNO_COOKIE",
+        {
+          status: 401,
+          statusText: "Unauthorized",
+          data: sessionResponse
+        }
+      );
     }
     // Save session ID for later use
     this.sid = sessionResponse.data.response['last_active_session_id'];

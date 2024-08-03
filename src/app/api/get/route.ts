@@ -1,6 +1,8 @@
 import { get, options } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
-import { sunoApiFactory } from "@/lib/services";
+import SunoSongInfo from "@/lib/models/SunoSongInfo";
+import SunoUser from "@/lib/models/SunoUser";
+import { getCurrentSunoUser, sunoApiFactory } from "@/lib/services";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -8,17 +10,35 @@ export const dynamic = "force-dynamic";
 export const GET = get(async (req: NextRequest) => {
   const url = new URL(req.url);
   const songIds = url.searchParams.get('ids');
-  let audioInfo = [];
   
   if (!songIds || songIds.length === 0) {
     return errorResponse({ error: 'Missing parameter ids' }, 400);
   }
   
   const idsArray = songIds.split(',');
-  const sunoApi = await sunoApiFactory.createBySunoSongId();
-  audioInfo = await sunoApi.get(idsArray);
+  const usersToSongsMap = new Map<SunoUser, string[]>();
+  
+  for (const songId of idsArray) {
+    const sunoUser = await getCurrentSunoUser({ sunoSongId: songId });
+    if (usersToSongsMap.has(sunoUser)) {
+      usersToSongsMap.get(sunoUser)?.push(songId);
+      continue;
+    } else {
+      usersToSongsMap.set(sunoUser, [songId]);
+    }
+  }
+  
+  let sunoSongInfos: SunoSongInfo[] = [];
+  
+  usersToSongsMap.forEach(async (songIds, sunoUser) => {
+    const sunoApi = await sunoApiFactory.createBySunoUser(sunoUser);
+    const songs = await sunoApi.get(songIds);
 
-  return okResponse(audioInfo);
+    sunoSongInfos = sunoSongInfos.concat(songs);
+  });
+  
+
+  return okResponse(sunoSongInfos);
 });
 
 export { options as OPTIONS };

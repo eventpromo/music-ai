@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { corsHeaders } from "./corsHeaders";
 import { errorResponse } from "./responses";
-import { InvalidCookieError, SunoApiError } from "../models/exceptions";
+import { SunoApiError } from "../models/exceptions";
 import { queue } from "../queue";
 import { CookieInvalidatedEvent } from "../queue/events";
 
@@ -14,18 +14,14 @@ function createHandler(method: HttpMethod, handler: RequestHandler): RequestHand
       try {
         return await handler(req);
       } catch (error) {
-        // TODO: Refactor this to a middleware
-
-        if (error instanceof InvalidCookieError) {
-          queue.emit(new CookieInvalidatedEvent({ sunoUserId: error.sunoUserId }));
-          
-          return errorResponse({ error: 'Invalid cookie. ', details: error.message }, 403);
-        }
-
         if (error instanceof SunoApiError) {
-          if (error.response.status === 402 || error.response.status === 403) {
-            queue.emit(new CookieInvalidatedEvent({ sunoUserId: error.sunoUserId }));
-          } 
+          if (error.response?.status === 401 ||
+              error.response?.status === 402 || error.response?.status === 403) {
+            queue.emit(new CookieInvalidatedEvent({
+              sunoUserId: error.sunoUserId,
+              noCredits: error.response?.status === 402
+            }));
+          }
 
           return errorResponse({
             error: "Cookie is expired or credits are finished",
@@ -66,4 +62,27 @@ export function options(request: Request) {
     status: 200,
     headers: corsHeaders
   });
+}
+
+export function withRetry(
+  handler: RequestHandler,
+  retries: number,
+  delay: number) {
+  
+  return async function (req: NextRequest): Promise<NextResponse> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await handler(req);
+      } catch (error) {
+        if (error instanceof SunoApiError) {
+          if (i < retries - 1) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+        throw error;
+      }
+    }
+    throw new Error('Max retries exceeded');
+  };
 }
