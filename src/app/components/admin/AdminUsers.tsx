@@ -233,7 +233,6 @@ const AdminUsers = ({ initialUsers }: { initialUsers: SunoUser[] }) => {
               </div>
               <div>
                 <strong>Credits Left: </strong>
-                {user.creditsLeft}
                 <input
                   type="number"
                   name="creditsLeft"

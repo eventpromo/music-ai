@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 export const POST = withRetry(post(async (req: NextRequest) => {
   const body = await req.json();
   const { prompt, make_instrumental, model, wait_audio } = body;
+  
   const currentSunoUser = await getCurrentSunoUser();
   const sunoApi = await sunoApiFactory.createBySunoUser(currentSunoUser);
 
