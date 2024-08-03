@@ -46,6 +46,12 @@ export default class DbContext {
     return {
       insert: (sunoSong: typeof sunoSongsTable.$inferInsert[]) => {
         return this.db.insert(sunoSongsTable).values(sunoSong);
+      },
+      delete: (id: string) => {
+        return this.db.delete(sunoSongsTable).where(eq(sunoSongsTable.id, id));
+      },
+      deleteAll: () => {
+        return this.db.delete(sunoSongsTable);
       }
     }
   }
@@ -61,6 +67,12 @@ export default class DbContext {
       },
       update: (id: string, sunoUser: SunoUserUpdateModel) => {        
         return this.db.update(sunoUsersTable).set(sunoUser).where(eq(sunoUsersTable.id, id))
+      },
+      delete: (id: string) => {
+        return this.db.delete(sunoUsersTable).where(eq(sunoUsersTable.id, id));
+      },
+      deleteAll: () => {
+        return this.db.delete(sunoUsersTable);
       }
     }
   }

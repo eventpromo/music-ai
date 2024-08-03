@@ -21,6 +21,16 @@ export default class SunoUserService {
     return SunoUserService.instance;
   }
 
+  public async createSunoUser(sunoUser: SunoUser): Promise<void> {
+    await this.dbContext.sunoUsersTable.insert(sunoUser);
+    this.clearCache();
+  }
+
+  public async updateSunoUser(sunoUser: SunoUser): Promise<void> {
+    await this.dbContext.sunoUsersTable.update(sunoUser.id, sunoUser);
+    this.clearCache();
+  }
+
   public async updateCookie(sunoUserId: string, cookie: string): Promise<void> {
     await this.dbContext.sunoUsersTable.update(sunoUserId, {
       cookie,

@@ -4,7 +4,6 @@ import spec from './swagger-suno-api.json';
 import Section from '../components/Section';
 import Markdown from 'react-markdown';
 
-
 export default function Docs() {
     return (
         <>

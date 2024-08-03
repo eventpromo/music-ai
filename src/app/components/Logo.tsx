@@ -1,4 +1,4 @@
-
+'use client';
 
 export default function Logo({ className = '', ...props }) {
   return (
