@@ -1,12 +1,10 @@
 import { options, get } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
 import { getCurrentSunoUser, sunoApiFactory } from "@/lib/services";
-import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = get(async (req: NextRequest) => {
-  const url = new URL(req.url);
+export const GET = get(async({ url }) => {
   const sunoUserId = url.searchParams.get('userId');
 
   if (!sunoUserId) {

@@ -1,15 +1,13 @@
-import { NextRequest } from "next/server";
 import { getCurrentSunoUser, sunoApiFactory } from "@/lib/services";
 import { DEFAULT_MODEL } from "@/lib/SunoApi";
-import { options, post, withRetry } from "@/lib/http/requests";
-import { errorResponse, okResponse } from "@/lib/http/responses";
+import { options, post } from "@/lib/http/requests";
+import { okResponse } from "@/lib/http/responses";
 import { queue } from "@/lib/queue";
 import { CreditsUsedEvent, SongsGeneratedEvent } from "@/lib/queue/events";
 
 export const dynamic = "force-dynamic";
 
-export const POST = withRetry(post(async (req: NextRequest) => {
-  const body = await req.json();
+export const POST = post(async ({ body }) => {
   const { prompt, make_instrumental, model, wait_audio } = body;
   
   const currentSunoUser = await getCurrentSunoUser();
@@ -34,7 +32,7 @@ export const POST = withRetry(post(async (req: NextRequest) => {
   }));
 
   return okResponse(sunoSongInfos);
-}), 2, 1000);
+}, { retries: 3, delay: 1000 });
 
 
 export { options as OPTIONS };

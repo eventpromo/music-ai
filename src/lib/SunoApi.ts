@@ -413,7 +413,7 @@ export default class SunoApi {
       creditsLeft: response.data.total_credits_left,
       period: response.data.period,
       monthlyLimit: response.data.monthly_limit,
-      monthlyLsage: response.data.monthly_usage,
+      monthlyUsage: response.data.monthly_usage,
     } as SunoUserCredits;
   }
 }

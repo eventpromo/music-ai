@@ -117,15 +117,12 @@ Suno API currently mainly implements the following APIs:
 
 ```bash
 - `/api/generate`: Generate music
-- `/v1/chat/completions`: Generate music - Call the generate API in a format that works with OpenAI’s API.
 - `/api/custom_generate`: Generate music (Custom Mode, support setting lyrics, music style, title, etc.)
 - `/api/generate_lyrics`: Generate lyrics based on prompt
 - `/api/get`: Get music information based on the id. Use “,” to separate multiple ids.
     If no IDs are provided, all music will be returned.
 - `/api/get_limit`: Get quota Info
 - `/api/extend_audio`: Extend audio length
-- `/api/clip`: Get clip information based on ID passed as query parameter `id`
-- `/api/concat`: Generate the whole song from extensions
 ```
 
 For more detailed documentation, please check out the demo site:

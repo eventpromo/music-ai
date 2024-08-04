@@ -14,5 +14,5 @@ export interface SunoUserCredits {
   creditsLeft: number,
   period: string,
   monthlyLimit: number,
-  monthlyLsage: number,
+  monthlyUsage: number,
 };

@@ -4,57 +4,96 @@ import { errorResponse } from "./responses";
 import { SunoApiError } from "../models/exceptions";
 import { queue } from "../queue";
 import { CookieInvalidatedEvent } from "../queue/events";
+import pino from "pino";
 
-type RequestHandler = (req: NextRequest) => NextResponse | Promise<NextResponse>;
+type RequestHandler = (req: SunoApiRequest) => NextResponse | Promise<NextResponse>;
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS';
+type RequestHandlerOptions = {
+  retries: number,
+  delay: number
+}
+export type SunoApiRequest = {
+  url: URL,
+  body: any
+}
 
-function createHandler(method: HttpMethod, handler: RequestHandler): RequestHandler {
+const HttpErrorCodes = [
+  401, // Unauthorized
+  402, // Payment Required
+  403 // Forbidden
+];
+
+const logger = pino();
+
+async function allowedHandler(req: NextRequest, handler: RequestHandler, options?: RequestHandlerOptions) {
+  const { retries, delay } = options || { retries: 1, delay: 0 };
+  let lastError: any;
+
+  const sunoApiRequest = {
+    url: new URL(req.url),
+    body: await req.json()
+  };
+  
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await handler(sunoApiRequest);
+    }
+    catch (error: any) {
+      lastError = error;
+
+      logger.error(`Attempt ${i + 1} failed: ${error.message}`, { error });
+
+      if (error instanceof SunoApiError) {          
+        if (HttpErrorCodes.includes(error.response?.status)) {
+          queue.emit(new CookieInvalidatedEvent({
+            sunoUserId: error.sunoUserId,
+            noCredits: error.response.status === 402
+          }));
+        }
+      }
+
+      if (i < retries - 1 && delay > 0) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  logger.error(`All ${retries} attempts failed: ${lastError.message}`, { lastError });
+
+  return errorResponse({
+    error: lastError?.message ? `Something went wrong: ${lastError?.message}` : 'Server error',
+    details: {
+      message: lastError.response?.data?.detail?.message,
+      name: lastError.response?.data?.detail?.name,
+      stack: lastError.response?.data?.detail?.stack,
+    }
+  }, lastError?.response?.status || 500);
+}
+
+function createHandler(method: HttpMethod, handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
   return async (req: NextRequest) => {
     if (req.method === method) {
-      try {
-        return await handler(req);
-      } catch (error) {
-        if (error instanceof SunoApiError) {
-          if (error.response?.status === 401 ||
-              error.response?.status === 402 || error.response?.status === 403) {
-            queue.emit(new CookieInvalidatedEvent({
-              sunoUserId: error.sunoUserId,
-              noCredits: error.response?.status === 402
-            }));
-          }
-
-          return errorResponse({
-            error: "Cookie is expired or credits are finished",
-            details: {
-              message: error.response.data?.detail?.message,
-              name: error.response.data?.detail?.name,
-              stack: error.response.data?.detail?.stack,
-            }
-          }, error.response.status);
-        }
-
-        return errorResponse({ error: 'Internal server error: ', details: error }, 500);
-      }
+      return await allowedHandler(req, handler, options);
     } else {
       return errorResponse('Method Not Allowed', 405);
     }
   }  
 }
 
-export function get(handler: RequestHandler): RequestHandler {
-  return createHandler('GET', handler);
+export function get(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+  return createHandler('GET', handler, options);
 }
 
-export function post(handler: RequestHandler): RequestHandler {
-  return createHandler('POST', handler);
+export function post(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+  return createHandler('POST', handler, options);
 }
 
-export function put(handler: RequestHandler): RequestHandler {
-  return createHandler('PUT', handler);
+export function put(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+  return createHandler('PUT', handler, options);
 }
 
-export function del(handler: RequestHandler): RequestHandler {
-  return createHandler('DELETE', handler);
+export function del(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+  return createHandler('DELETE', handler, options);
 }
 
 export function options(request: Request) {
@@ -62,27 +101,4 @@ export function options(request: Request) {
     status: 200,
     headers: corsHeaders
   });
-}
-
-export function withRetry(
-  handler: RequestHandler,
-  retries: number,
-  delay: number) {
-  
-  return async function (req: NextRequest): Promise<NextResponse> {
-    for (let i = 0; i < retries; i++) {
-      try {
-        return await handler(req);
-      } catch (error) {
-        if (error instanceof SunoApiError) {
-          if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-        }
-        throw error;
-      }
-    }
-    throw new Error('Max retries exceeded');
-  };
 }

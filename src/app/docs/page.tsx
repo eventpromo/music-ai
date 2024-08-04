@@ -19,8 +19,6 @@ export default function Docs() {
 
 \`\`\`bash
 - \`/api/generate\`: Generate music
-- \`/v1/chat/completions\`: Generate music - Call the generate API in a format 
-  that works with OpenAI’s API.
 - \`/api/custom_generate\`: Generate music (Custom Mode, support setting lyrics, 
   music style, title, etc.)
 - \`/api/generate_lyrics\`: Generate lyrics based on prompt
@@ -28,8 +26,6 @@ export default function Docs() {
     ids.  If no IDs are provided, all music will be returned.
 - \`/api/get_limit\`: Get quota Info
 - \`/api/extend_audio\`: Extend audio length
-- \`/api/clip\`:  Get clip information based on ID passed as query parameter \`id\`
-- \`/api/concat\`: Generate the whole song from extensions
 \`\`\`
 
 Feel free to explore the detailed API parameters and conduct tests on this page.

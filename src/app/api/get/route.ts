@@ -3,12 +3,10 @@ import { errorResponse, okResponse } from "@/lib/http/responses";
 import SunoSongInfo from "@/lib/models/SunoSongInfo";
 import SunoUser from "@/lib/models/SunoUser";
 import { getCurrentSunoUser, sunoApiFactory } from "@/lib/services";
-import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = get(async (req: NextRequest) => {
-  const url = new URL(req.url);
+export const GET = get(async({ url }) => {
   const songIds = url.searchParams.get('ids');
   
   if (!songIds || songIds.length === 0) {
@@ -30,13 +28,13 @@ export const GET = get(async (req: NextRequest) => {
   
   let sunoSongInfos: SunoSongInfo[] = [];
   
-  usersToSongsMap.forEach(async (songIds, sunoUser) => {
+  for (const [sunoUser, songIds] of usersToSongsMap) {
     const sunoApi = await sunoApiFactory.createBySunoUser(sunoUser);
     const songs = await sunoApi.get(songIds);
 
-    sunoSongInfos = sunoSongInfos.concat(songs);
-  });
-  
+    sunoSongInfos = [...songs, ...sunoSongInfos];
+
+  }
 
   return okResponse(sunoSongInfos);
 });
