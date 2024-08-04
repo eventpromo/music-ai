@@ -25,13 +25,28 @@ const HttpErrorCodes = [
 
 const logger = pino();
 
+async function readBody(req: NextRequest) {
+  const contentLength = req.headers.get('content-length');
+  
+  if (contentLength && parseInt(contentLength, 10) > 0) {
+    try {
+      return await req.json();
+    } catch (error: any) {
+      logger.error(`Failed to parse request body: ${error.message}`, { error });
+      throw error;
+    }
+  }
+
+  return {};
+}
+
 async function allowedHandler(req: NextRequest, handler: RequestHandler, options?: RequestHandlerOptions) {
   const { retries, delay } = options || { retries: 1, delay: 0 };
   let lastError: any;
 
   const sunoApiRequest = {
     url: new URL(req.url),
-    body: await req.json()
+    body: await readBody(req),
   };
   
   for (let i = 0; i < retries; i++) {
@@ -70,7 +85,7 @@ async function allowedHandler(req: NextRequest, handler: RequestHandler, options
   }, lastError?.response?.status || 500);
 }
 
-function createHandler(method: HttpMethod, handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+function createHandler(method: HttpMethod, handler: RequestHandler, options?: RequestHandlerOptions) {
   return async (req: NextRequest) => {
     if (req.method === method) {
       return await allowedHandler(req, handler, options);
@@ -80,19 +95,19 @@ function createHandler(method: HttpMethod, handler: RequestHandler, options?: Re
   }  
 }
 
-export function get(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+export function get(handler: RequestHandler, options?: RequestHandlerOptions) {
   return createHandler('GET', handler, options);
 }
 
-export function post(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+export function post(handler: RequestHandler, options?: RequestHandlerOptions) {
   return createHandler('POST', handler, options);
 }
 
-export function put(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+export function put(handler: RequestHandler, options?: RequestHandlerOptions) {
   return createHandler('PUT', handler, options);
 }
 
-export function del(handler: RequestHandler, options?: RequestHandlerOptions): RequestHandler {
+export function del(handler: RequestHandler, options?: RequestHandlerOptions) {
   return createHandler('DELETE', handler, options);
 }
 

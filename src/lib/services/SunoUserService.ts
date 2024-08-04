@@ -30,6 +30,7 @@ export default class SunoUserService {
   }
 
   public async updateSunoUser(sunoUser: SunoUser): Promise<void> {
+    sunoUser.status = (sunoUser.creditsLeft ?? 0) <= 0 ? SunoUserStatus.Blocked : SunoUserStatus.Active;
     await this.dbContext.sunoUsersTable.update(sunoUser.id, sunoUser);
     this.clearCache(sunoUser.id);
   }

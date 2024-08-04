@@ -2,26 +2,23 @@ import { get, put, post, options } from "@/lib/http/requests";
 import { errorResponse, okResponse } from "@/lib/http/responses";
 import { sunoUserService } from "@/lib/services";
 import { withApiAuthRequired } from "@auth0/nextjs-auth0";
-import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = withApiAuthRequired(get(async (req: NextRequest) => {
+export const GET = withApiAuthRequired(get(async () => {
   const sunoUsers = await sunoUserService.getSunoUsers();
 
   return okResponse(sunoUsers);
 }));
 
 // Update
-export const PUT = withApiAuthRequired(put(async (req: NextRequest) => {
-  const url = new URL(req.url);
+export const PUT = withApiAuthRequired(put(async ({ url, body }) => {
   const sunoUserId = url.searchParams.get('id');
 
   if (!sunoUserId || sunoUserId.length === 0) {
     return errorResponse({ error: 'Missing parameter userId' }, 400);
   }
   
-  const body = await req.json();
   const { status, cookie, creditsLeft } = body;
 
   const sunoUser = {
@@ -37,8 +34,7 @@ export const PUT = withApiAuthRequired(put(async (req: NextRequest) => {
 }));
 
 // Create
-export const POST = withApiAuthRequired(post(async (req: NextRequest) => {  
-  const body = await req.json();
+export const POST = withApiAuthRequired(post(async({ body }) => {  
   const { id, status, cookie, creditsLeft } = body;
 
   const sunoUser = {
